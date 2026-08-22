@@ -1,0 +1,41 @@
+package rt.data.analyzer.ner;
+
+import rt.common.entities_and_dtos.NamedEntity;
+
+import java.util.List;
+import java.util.Set;
+
+public class NERService {
+    private final EntityLoader entityLoader = new EntityLoader();
+    private final EntityFinder entityFinder = new EntityFinder();
+    private final List<NamedEntity> loadedEntities;
+
+    public NERService() {
+        loadedEntities = entityLoader.loadAndGet();
+        entityFinder.setEntities(loadedEntities);
+    }
+
+    public Set<NamedEntity> findAllByNameOrSynonym(String text) {
+        return entityFinder.findAllByNameOrSynonym(text);
+    }
+
+    public Set<NamedEntity> findAllByCategory(String text) {
+        return entityFinder.findAllByCategory(text);
+    }
+
+    public Set<NamedEntity> findAllByTag(String text) {
+        return entityFinder.findAllByTag(text);
+    }
+
+    public Set<NamedEntity> searchAllFields(String text) {
+        return entityFinder.searchAllFields(text);
+    }
+
+    public Set<NamedEntity> extractEntitiesByPartialName(String text) {
+        return entityFinder.extractEntitiesByPartialName(text);
+    }
+
+    public Set<NamedEntity> extractEntitiesByExactName(String text) {
+        return entityFinder.extractEntitiesByExactName(text);
+    }
+}

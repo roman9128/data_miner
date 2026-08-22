@@ -1,0 +1,515 @@
+[
+  {
+    "name": "Москва",
+    "synonyms": [
+      "Moscow"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia",
+      "Capital"
+    ]
+  },
+  {
+    "name": "Санкт-Петербург",
+    "synonyms": [
+      "Saint Petersburg",
+      "SPB"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Новосибирск",
+    "synonyms": [
+      "Novosibirsk"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Екатеринбург",
+    "synonyms": [
+      "Yekaterinburg",
+      "Ekaterinburg"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Нижний Новгород",
+    "synonyms": [
+      "Nizhny Novgorod"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Казань",
+    "synonyms": [
+      "Kazan"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Челябинск",
+    "synonyms": [
+      "Chelyabinsk"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Самара",
+    "synonyms": [
+      "Samara"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Омск",
+    "synonyms": [
+      "Omsk"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Ростов-на-Дону",
+    "synonyms": [
+      "Rostov-on-Don"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Уфа",
+    "synonyms": [
+      "Ufa"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Красноярск",
+    "synonyms": [
+      "Krasnoyarsk"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Воронеж",
+    "synonyms": [
+      "Voronezh"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Пермь",
+    "synonyms": [
+      "Perm"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Волгоград",
+    "synonyms": [
+      "Volgograd"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Краснодар",
+    "synonyms": [
+      "Krasnodar"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Саратов",
+    "synonyms": [
+      "Saratov"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Тюмень",
+    "synonyms": [
+      "Tyumen"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Тольятти",
+    "synonyms": [
+      "Tolyatti"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Ижевск",
+    "synonyms": [
+      "Izhevsk"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Барнаул",
+    "synonyms": [
+      "Barnaul"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Ульяновск",
+    "synonyms": [
+      "Ulyanovsk"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Иркутск",
+    "synonyms": [
+      "Irkutsk"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Кемерово",
+    "synonyms": [
+      "Kemerovo"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Рязань",
+    "synonyms": [
+      "Ryazan"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Набережные Челны",
+    "synonyms": [
+      "Naberezhnye Chelny"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Астрахань",
+    "synonyms": [
+      "Astrakhan"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Пенза",
+    "synonyms": [
+      "Penza"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Липецк",
+    "synonyms": [
+      "Lipetsk"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Тула",
+    "synonyms": [
+      "Tula"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Киров",
+    "synonyms": [
+      "Kirov"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Чебоксары",
+    "synonyms": [
+      "Cheboksary"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Калуга",
+    "synonyms": [
+      "Kaluga"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Смоленск",
+    "synonyms": [
+      "Smolensk"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Сургут",
+    "synonyms": [
+      "Surgut"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Владивосток",
+    "synonyms": [
+      "Vladivostok"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Ярославль",
+    "synonyms": [
+      "Yaroslavl"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Хабаровск",
+    "synonyms": [
+      "Khabarovsk"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Махачкала",
+    "synonyms": [
+      "Makhachkala"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Оренбург",
+    "synonyms": [
+      "Orenburg"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Тверь",
+    "synonyms": [
+      "Tver"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Ставрополь",
+    "synonyms": [
+      "Stavropol"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Белгород",
+    "synonyms": [
+      "Belgorod"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Калининград",
+    "synonyms": [
+      "Kaliningrad"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Владимир",
+    "synonyms": [
+      "Vladimir"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Таганрог",
+    "synonyms": [
+      "Taganrog"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Нижний Тагил",
+    "synonyms": [
+      "Nizhny Tagil"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Череповец",
+    "synonyms": [
+      "Cherepovets"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Сочи",
+    "synonyms": [
+      "Sochi"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Курск",
+    "synonyms": [
+      "Kursk"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  },
+  {
+    "name": "Томск",
+    "synonyms": [
+      "Tomsk"
+    ],
+    "category": "City",
+    "tags": [
+      "Russia"
+    ]
+  }
+]

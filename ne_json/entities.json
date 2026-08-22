@@ -1,0 +1,1112 @@
+[
+  {
+    "name": "Elon Musk",
+    "synonyms": [
+      "Илон Маск"
+    ],
+    "category": "Business",
+    "tags": [
+      "CEO",
+      "Tesla",
+      "SpaceX"
+    ]
+  },
+  {
+    "name": "Donald Trump",
+    "synonyms": [
+      "Дональд Трамп"
+    ],
+    "category": "Politics",
+    "tags": [
+      "Former President",
+      "USA"
+    ]
+  },
+  {
+    "name": "Angela Merkel",
+    "synonyms": [
+      "Ангела Меркель"
+    ],
+    "category": "Politics",
+    "tags": [
+      "Chancellor",
+      "Germany"
+    ]
+  },
+  {
+    "name": "Jeff Bezos",
+    "synonyms": [
+      "Джефф Безос"
+    ],
+    "category": "Business",
+    "tags": [
+      "Founder",
+      "Amazon"
+    ]
+  },
+  {
+    "name": "Xi Jinping",
+    "synonyms": [
+      "Си Цзиньпин"
+    ],
+    "category": "Politics",
+    "tags": [
+      "President",
+      "China"
+    ]
+  },
+  {
+    "name": "Vladimir Putin",
+    "synonyms": [
+      "Владимир Путин", "Путин"
+    ],
+    "category": "Politics",
+    "tags": [
+      "President",
+      "Russia"
+    ]
+  },
+  {
+    "name": "Apple Inc.",
+    "synonyms": [
+      "Apple"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Consumer Electronics",
+      "Software"
+    ]
+  },
+  {
+    "name": "Microsoft Corporation",
+    "synonyms": [
+      "Microsoft"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Software",
+      "Cloud Computing"
+    ]
+  },
+  {
+    "name": "Tesla, Inc.",
+    "synonyms": [
+      "Tesla"
+    ],
+    "category": "Automotive",
+    "tags": [
+      "Electric Vehicles",
+      "Energy"
+    ]
+  },
+  {
+    "name": "Facebook, Inc.",
+    "synonyms": [
+      "Facebook"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Social Media",
+      "Advertising"
+    ]
+  },
+  {
+    "name": "Elon Musk",
+    "synonyms": [
+      "Илон Маск"
+    ],
+    "category": "Business",
+    "tags": [
+      "CEO",
+      "Tesla",
+      "SpaceX"
+    ]
+  },
+  {
+    "name": "Donald Trump",
+    "synonyms": [
+      "Дональд Трамп"
+    ],
+    "category": "Politics",
+    "tags": [
+      "Former President",
+      "USA"
+    ]
+  },
+  {
+    "name": "Angela Merkel",
+    "synonyms": [
+      "Ангела Меркель"
+    ],
+    "category": "Politics",
+    "tags": [
+      "Chancellor",
+      "Germany"
+    ]
+  },
+  {
+    "name": "Jeff Bezos",
+    "synonyms": [
+      "Джефф Безос"
+    ],
+    "category": "Business",
+    "tags": [
+      "Founder",
+      "Amazon"
+    ]
+  },
+  {
+    "name": "Xi Jinping",
+    "synonyms": [
+      "Си Цзиньпин"
+    ],
+    "category": "Politics",
+    "tags": [
+      "President",
+      "China"
+    ]
+  },
+  {
+    "name": "Vladimir Putin",
+    "synonyms": [
+      "Владимир Путин"
+    ],
+    "category": "Politics",
+    "tags": [
+      "President",
+      "Russia"
+    ]
+  },
+  {
+    "name": "Apple Inc.",
+    "synonyms": [
+      "Apple"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Consumer Electronics",
+      "Software"
+    ]
+  },
+  {
+    "name": "Microsoft Corporation",
+    "synonyms": [
+      "Microsoft"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Software",
+      "Cloud Computing"
+    ]
+  },
+  {
+    "name": "Tesla, Inc.",
+    "synonyms": [
+      "Tesla"
+    ],
+    "category": "Automotive",
+    "tags": [
+      "Electric Vehicles",
+      "Energy"
+    ]
+  },
+  {
+    "name": "Facebook, Inc.",
+    "synonyms": [
+      "Facebook"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Social Media",
+      "Advertising"
+    ]
+  },
+  {
+    "name": "Elon Musk",
+    "synonyms": [
+      "Илон Маск"
+    ],
+    "category": "Business",
+    "tags": [
+      "CEO",
+      "Tesla",
+      "SpaceX"
+    ]
+  },
+  {
+    "name": "Donald Trump",
+    "synonyms": [
+      "Дональд Трамп"
+    ],
+    "category": "Politics",
+    "tags": [
+      "Former President",
+      "USA"
+    ]
+  },
+  {
+    "name": "Angela Merkel",
+    "synonyms": [
+      "Ангела Меркель"
+    ],
+    "category": "Politics",
+    "tags": [
+      "Chancellor",
+      "Germany"
+    ]
+  },
+  {
+    "name": "Jeff Bezos",
+    "synonyms": [
+      "Джефф Безос"
+    ],
+    "category": "Business",
+    "tags": [
+      "Founder",
+      "Amazon"
+    ]
+  },
+  {
+    "name": "Xi Jinping",
+    "synonyms": [
+      "Си Цзиньпин"
+    ],
+    "category": "Politics",
+    "tags": [
+      "President",
+      "China"
+    ]
+  },
+  {
+    "name": "Vladimir Putin",
+    "synonyms": [
+      "Владимир Путин"
+    ],
+    "category": "Politics",
+    "tags": [
+      "President",
+      "Russia"
+    ]
+  },
+  {
+    "name": "Apple Inc.",
+    "synonyms": [
+      "Apple"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Consumer Electronics",
+      "Software"
+    ]
+  },
+  {
+    "name": "Microsoft Corporation",
+    "synonyms": [
+      "Microsoft"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Software",
+      "Cloud Computing"
+    ]
+  },
+  {
+    "name": "Tesla, Inc.",
+    "synonyms": [
+      "Tesla"
+    ],
+    "category": "Automotive",
+    "tags": [
+      "Electric Vehicles",
+      "Energy"
+    ]
+  },
+  {
+    "name": "Facebook, Inc.",
+    "synonyms": [
+      "Facebook"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Social Media",
+      "Advertising"
+    ]
+  },
+  {
+    "name": "Elon Musk",
+    "synonyms": [
+      "Илон Маск"
+    ],
+    "category": "Business",
+    "tags": [
+      "CEO",
+      "Tesla",
+      "SpaceX"
+    ]
+  },
+  {
+    "name": "Donald Trump",
+    "synonyms": [
+      "Дональд Трамп"
+    ],
+    "category": "Politics",
+    "tags": [
+      "Former President",
+      "USA"
+    ]
+  },
+  {
+    "name": "Angela Merkel",
+    "synonyms": [
+      "Ангела Меркель"
+    ],
+    "category": "Politics",
+    "tags": [
+      "Chancellor",
+      "Germany"
+    ]
+  },
+  {
+    "name": "Jeff Bezos",
+    "synonyms": [
+      "Джефф Безос"
+    ],
+    "category": "Business",
+    "tags": [
+      "Founder",
+      "Amazon"
+    ]
+  },
+  {
+    "name": "Xi Jinping",
+    "synonyms": [
+      "Си Цзиньпин"
+    ],
+    "category": "Politics",
+    "tags": [
+      "President",
+      "China"
+    ]
+  },
+  {
+    "name": "Vladimir Putin",
+    "synonyms": [
+      "Владимир Путин"
+    ],
+    "category": "Politics",
+    "tags": [
+      "President",
+      "Russia"
+    ]
+  },
+  {
+    "name": "Apple Inc.",
+    "synonyms": [
+      "Apple"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Consumer Electronics",
+      "Software"
+    ]
+  },
+  {
+    "name": "Microsoft Corporation",
+    "synonyms": [
+      "Microsoft"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Software",
+      "Cloud Computing"
+    ]
+  },
+  {
+    "name": "Tesla, Inc.",
+    "synonyms": [
+      "Tesla"
+    ],
+    "category": "Automotive",
+    "tags": [
+      "Electric Vehicles",
+      "Energy"
+    ]
+  },
+  {
+    "name": "Facebook, Inc.",
+    "synonyms": [
+      "Facebook"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Social Media",
+      "Advertising"
+    ]
+  },
+  {
+    "name": "Elon Musk",
+    "synonyms": [
+      "Илон Маск"
+    ],
+    "category": "Business",
+    "tags": [
+      "CEO",
+      "Tesla",
+      "SpaceX"
+    ]
+  },
+  {
+    "name": "Donald Trump",
+    "synonyms": [
+      "Дональд Трамп"
+    ],
+    "category": "Politics",
+    "tags": [
+      "Former President",
+      "USA"
+    ]
+  },
+  {
+    "name": "Angela Merkel",
+    "synonyms": [
+      "Ангела Меркель"
+    ],
+    "category": "Politics",
+    "tags": [
+      "Chancellor",
+      "Germany"
+    ]
+  },
+  {
+    "name": "Jeff Bezos",
+    "synonyms": [
+      "Джефф Безос"
+    ],
+    "category": "Business",
+    "tags": [
+      "Founder",
+      "Amazon"
+    ]
+  },
+  {
+    "name": "Xi Jinping",
+    "synonyms": [
+      "Си Цзиньпин"
+    ],
+    "category": "Politics",
+    "tags": [
+      "President",
+      "China"
+    ]
+  },
+  {
+    "name": "Vladimir Putin",
+    "synonyms": [
+      "Владимир Путин"
+    ],
+    "category": "Politics",
+    "tags": [
+      "President",
+      "Russia"
+    ]
+  },
+  {
+    "name": "Apple Inc.",
+    "synonyms": [
+      "Apple"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Consumer Electronics",
+      "Software"
+    ]
+  },
+  {
+    "name": "Microsoft Corporation",
+    "synonyms": [
+      "Microsoft"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Software",
+      "Cloud Computing"
+    ]
+  },
+  {
+    "name": "Tesla, Inc.",
+    "synonyms": [
+      "Tesla"
+    ],
+    "category": "Automotive",
+    "tags": [
+      "Electric Vehicles",
+      "Energy"
+    ]
+  },
+  {
+    "name": "Facebook, Inc.",
+    "synonyms": [
+      "Facebook"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Social Media",
+      "Advertising"
+    ]
+  },
+  {
+    "name": "Elon Musk",
+    "synonyms": [
+      "Илон Маск"
+    ],
+    "category": "Business",
+    "tags": [
+      "CEO",
+      "Tesla",
+      "SpaceX"
+    ]
+  },
+  {
+    "name": "Donald Trump",
+    "synonyms": [
+      "Дональд Трамп"
+    ],
+    "category": "Politics",
+    "tags": [
+      "Former President",
+      "USA"
+    ]
+  },
+  {
+    "name": "Angela Merkel",
+    "synonyms": [
+      "Ангела Меркель"
+    ],
+    "category": "Politics",
+    "tags": [
+      "Chancellor",
+      "Germany"
+    ]
+  },
+  {
+    "name": "Jeff Bezos",
+    "synonyms": [
+      "Джефф Безос"
+    ],
+    "category": "Business",
+    "tags": [
+      "Founder",
+      "Amazon"
+    ]
+  },
+  {
+    "name": "Xi Jinping",
+    "synonyms": [
+      "Си Цзиньпин"
+    ],
+    "category": "Politics",
+    "tags": [
+      "President",
+      "China"
+    ]
+  },
+  {
+    "name": "Vladimir Putin",
+    "synonyms": [
+      "Владимир Путин"
+    ],
+    "category": "Politics",
+    "tags": [
+      "President",
+      "Russia"
+    ]
+  },
+  {
+    "name": "Apple Inc.",
+    "synonyms": [
+      "Apple"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Consumer Electronics",
+      "Software"
+    ]
+  },
+  {
+    "name": "Microsoft Corporation",
+    "synonyms": [
+      "Microsoft"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Software",
+      "Cloud Computing"
+    ]
+  },
+  {
+    "name": "Tesla, Inc.",
+    "synonyms": [
+      "Tesla"
+    ],
+    "category": "Automotive",
+    "tags": [
+      "Electric Vehicles",
+      "Energy"
+    ]
+  },
+  {
+    "name": "Facebook, Inc.",
+    "synonyms": [
+      "Facebook"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Social Media",
+      "Advertising"
+    ]
+  },
+  {
+    "name": "Elon Musk",
+    "synonyms": [
+      "Илон Маск"
+    ],
+    "category": "Business",
+    "tags": [
+      "CEO",
+      "Tesla",
+      "SpaceX"
+    ]
+  },
+  {
+    "name": "Donald Trump",
+    "synonyms": [
+      "Дональд Трамп"
+    ],
+    "category": "Politics",
+    "tags": [
+      "Former President",
+      "USA"
+    ]
+  },
+  {
+    "name": "Angela Merkel",
+    "synonyms": [
+      "Ангела Меркель"
+    ],
+    "category": "Politics",
+    "tags": [
+      "Chancellor",
+      "Germany"
+    ]
+  },
+  {
+    "name": "Jeff Bezos",
+    "synonyms": [
+      "Джефф Безос"
+    ],
+    "category": "Business",
+    "tags": [
+      "Founder",
+      "Amazon"
+    ]
+  },
+  {
+    "name": "Xi Jinping",
+    "synonyms": [
+      "Си Цзиньпин"
+    ],
+    "category": "Politics",
+    "tags": [
+      "President",
+      "China"
+    ]
+  },
+  {
+    "name": "Vladimir Putin",
+    "synonyms": [
+      "Владимир Путин"
+    ],
+    "category": "Politics",
+    "tags": [
+      "President",
+      "Russia"
+    ]
+  },
+  {
+    "name": "Apple Inc.",
+    "synonyms": [
+      "Apple"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Consumer Electronics",
+      "Software"
+    ]
+  },
+  {
+    "name": "Microsoft Corporation",
+    "synonyms": [
+      "Microsoft"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Software",
+      "Cloud Computing"
+    ]
+  },
+  {
+    "name": "Tesla, Inc.",
+    "synonyms": [
+      "Tesla"
+    ],
+    "category": "Automotive",
+    "tags": [
+      "Electric Vehicles",
+      "Energy"
+    ]
+  },
+  {
+    "name": "Facebook, Inc.",
+    "synonyms": [
+      "Facebook"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Social Media",
+      "Advertising"
+    ]
+  },
+  {
+    "name": "Elon Musk",
+    "synonyms": [
+      "Илон Маск"
+    ],
+    "category": "Business",
+    "tags": [
+      "CEO",
+      "Tesla",
+      "SpaceX"
+    ]
+  },
+  {
+    "name": "Donald Trump",
+    "synonyms": [
+      "Дональд Трамп"
+    ],
+    "category": "Politics",
+    "tags": [
+      "Former President",
+      "USA"
+    ]
+  },
+  {
+    "name": "Angela Merkel",
+    "synonyms": [
+      "Ангела Меркель"
+    ],
+    "category": "Politics",
+    "tags": [
+      "Chancellor",
+      "Germany"
+    ]
+  },
+  {
+    "name": "Jeff Bezos",
+    "synonyms": [
+      "Джефф Безос"
+    ],
+    "category": "Business",
+    "tags": [
+      "Founder",
+      "Amazon"
+    ]
+  },
+  {
+    "name": "Xi Jinping",
+    "synonyms": [
+      "Си Цзиньпин"
+    ],
+    "category": "Politics",
+    "tags": [
+      "President",
+      "China"
+    ]
+  },
+  {
+    "name": "Vladimir Putin",
+    "synonyms": [
+      "Владимир Путин"
+    ],
+    "category": "Politics",
+    "tags": [
+      "President",
+      "Russia"
+    ]
+  },
+  {
+    "name": "Apple Inc.",
+    "synonyms": [
+      "Apple"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Consumer Electronics",
+      "Software"
+    ]
+  },
+  {
+    "name": "Microsoft Corporation",
+    "synonyms": [
+      "Microsoft"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Software",
+      "Cloud Computing"
+    ]
+  },
+  {
+    "name": "Tesla, Inc.",
+    "synonyms": [
+      "Tesla"
+    ],
+    "category": "Automotive",
+    "tags": [
+      "Electric Vehicles",
+      "Energy"
+    ]
+  },
+  {
+    "name": "Facebook, Inc.",
+    "synonyms": [
+      "Facebook"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Social Media",
+      "Advertising"
+    ]
+  },
+  {
+    "name": "Elon Musk",
+    "synonyms": [
+      "Илон Маск"
+    ],
+    "category": "Business",
+    "tags": [
+      "CEO",
+      "Tesla",
+      "SpaceX"
+    ]
+  },
+  {
+    "name": "Donald Trump",
+    "synonyms": [
+      "Дональд Трамп"
+    ],
+    "category": "Politics",
+    "tags": [
+      "Former President",
+      "USA"
+    ]
+  },
+  {
+    "name": "Angela Merkel",
+    "synonyms": [
+      "Ангела Меркель"
+    ],
+    "category": "Politics",
+    "tags": [
+      "Chancellor",
+      "Germany"
+    ]
+  },
+  {
+    "name": "Jeff Bezos",
+    "synonyms": [
+      "Джефф Безос"
+    ],
+    "category": "Business",
+    "tags": [
+      "Founder",
+      "Amazon"
+    ]
+  },
+  {
+    "name": "Xi Jinping",
+    "synonyms": [
+      "Си Цзиньпин"
+    ],
+    "category": "Politics",
+    "tags": [
+      "President",
+      "China"
+    ]
+  },
+  {
+    "name": "Vladimir Putin",
+    "synonyms": [
+      "Владимир Путин"
+    ],
+    "category": "Politics",
+    "tags": [
+      "President",
+      "Russia"
+    ]
+  },
+  {
+    "name": "Apple Inc.",
+    "synonyms": [
+      "Apple"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Consumer Electronics",
+      "Software"
+    ]
+  },
+  {
+    "name": "Microsoft Corporation",
+    "synonyms": [
+      "Microsoft"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Software",
+      "Cloud Computing"
+    ]
+  },
+  {
+    "name": "Tesla, Inc.",
+    "synonyms": [
+      "Tesla"
+    ],
+    "category": "Automotive",
+    "tags": [
+      "Electric Vehicles",
+      "Energy"
+    ]
+  },
+  {
+    "name": "Facebook, Inc.",
+    "synonyms": [
+      "Facebook"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Social Media",
+      "Advertising"
+    ]
+  },
+  {
+    "name": "Elon Musk",
+    "synonyms": [
+      "Илон Маск"
+    ],
+    "category": "Business",
+    "tags": [
+      "CEO",
+      "Tesla",
+      "SpaceX"
+    ]
+  },
+  {
+    "name": "Donald Trump",
+    "synonyms": [
+      "Дональд Трамп"
+    ],
+    "category": "Politics",
+    "tags": [
+      "Former President",
+      "USA"
+    ]
+  },
+  {
+    "name": "Angela Merkel",
+    "synonyms": [
+      "Ангела Меркель"
+    ],
+    "category": "Politics",
+    "tags": [
+      "Chancellor",
+      "Germany"
+    ]
+  },
+  {
+    "name": "Jeff Bezos",
+    "synonyms": [
+      "Джефф Безос"
+    ],
+    "category": "Business",
+    "tags": [
+      "Founder",
+      "Amazon"
+    ]
+  },
+  {
+    "name": "Xi Jinping",
+    "synonyms": [
+      "Си Цзиньпин"
+    ],
+    "category": "Politics",
+    "tags": [
+      "President",
+      "China"
+    ]
+  },
+  {
+    "name": "Vladimir Putin",
+    "synonyms": [
+      "Владимир Путин"
+    ],
+    "category": "Politics",
+    "tags": [
+      "President",
+      "Russia"
+    ]
+  },
+  {
+    "name": "Apple Inc.",
+    "synonyms": [
+      "Apple"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Consumer Electronics",
+      "Software"
+    ]
+  },
+  {
+    "name": "Microsoft Corporation",
+    "synonyms": [
+      "Microsoft"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Software",
+      "Cloud Computing"
+    ]
+  },
+  {
+    "name": "Tesla, Inc.",
+    "synonyms": [
+      "Tesla"
+    ],
+    "category": "Automotive",
+    "tags": [
+      "Electric Vehicles",
+      "Energy"
+    ]
+  },
+  {
+    "name": "Facebook, Inc.",
+    "synonyms": [
+      "Facebook"
+    ],
+    "category": "Technology",
+    "tags": [
+      "Social Media",
+      "Advertising"
+    ]
+  }
+]
