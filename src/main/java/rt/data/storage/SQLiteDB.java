@@ -53,6 +53,7 @@ public class SQLiteDB {
                     
                         parsed_at           TEXT NOT NULL,
                     
+                        published_at        TEXT NOT NULL,
                         publish_year        INTEGER NOT NULL,
                         publish_month       INTEGER NOT NULL,
                         publish_day         INTEGER NOT NULL,
@@ -67,6 +68,11 @@ public class SQLiteDB {
                         word_count          INTEGER NOT NULL,
                         average_word_length REAL NOT NULL,
                         emoji_count         INTEGER NOT NULL,
+                    
+                        reply_to_chat_id          INTEGER NOT NULL,
+                        reply_to_message_id       INTEGER NOT NULL,
+                        forward_origin_chat_id    INTEGER NOT NULL,
+                        forward_origin_message_id INTEGER NOT NULL,
                     
                         UNIQUE (
                             telegram_message_id,
@@ -281,6 +287,7 @@ public class SQLiteDB {
                         link,
                         parsed_at,
                     
+                        published_at,
                         publish_year,
                         publish_month,
                         publish_day,
@@ -294,12 +301,16 @@ public class SQLiteDB {
                         text_length,
                         word_count,
                         average_word_length,
-                        emoji_count
+                        emoji_count,
+                        reply_to_chat_id,
+                        reply_to_message_id,
+                        forward_origin_chat_id,
+                        forward_origin_message_id
                     )
                     VALUES (
                         ?, ?, ?, ?, ?,
-                        ?, ?, ?, ?, ?, ?, ?,
-                        ?, ?, ?, ?, ?, ?
+                        ?, ?, ?, ?, ?, ?, ?, ?,
+                        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
                     )
                     ON CONFLICT (
                         telegram_message_id,
@@ -310,6 +321,7 @@ public class SQLiteDB {
                         link = excluded.link,
                         parsed_at = excluded.parsed_at,
                     
+                        published_at = excluded.published_at,
                         publish_year = excluded.publish_year,
                         publish_month = excluded.publish_month,
                         publish_day = excluded.publish_day,
@@ -323,7 +335,11 @@ public class SQLiteDB {
                         text_length = excluded.text_length,
                         word_count = excluded.word_count,
                         average_word_length = excluded.average_word_length,
-                        emoji_count = excluded.emoji_count
+                        emoji_count = excluded.emoji_count,
+                        reply_to_chat_id = excluded.reply_to_chat_id,
+                        reply_to_message_id = excluded.reply_to_message_id,
+                        forward_origin_chat_id = excluded.forward_origin_chat_id,
+                        forward_origin_message_id = excluded.forward_origin_message_id
                     """;
 
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -335,6 +351,7 @@ public class SQLiteDB {
                 statement.setString(i++, messageRecord.chatName());
                 statement.setString(i++, messageRecord.link());
                 statement.setString(i++, messageRecord.parsedAt().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")));
+                statement.setString(i++, messageRecord.publishedAt().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")));
                 statement.setInt(i++, messageRecord.publishYear());
                 statement.setInt(i++, messageRecord.publishMonth().getValue());
                 statement.setInt(i++, messageRecord.publishDayOfMonth());
@@ -348,6 +365,10 @@ public class SQLiteDB {
                 statement.setInt(i++, messageRecord.wordCount());
                 statement.setDouble(i++, messageRecord.averageWordLength());
                 statement.setInt(i++, messageRecord.emojiCount());
+                statement.setLong(i++, messageRecord.replyToChatId());
+                statement.setLong(i++, messageRecord.replyToMessageId());
+                statement.setLong(i++, messageRecord.forwardOriginChatId());
+                statement.setLong(i++, messageRecord.forwardOriginMessageId());
 
                 statement.executeUpdate();
             }

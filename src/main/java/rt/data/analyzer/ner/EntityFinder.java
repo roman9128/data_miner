@@ -26,41 +26,6 @@ class EntityFinder {
         }
     }
 
-    Set<NamedEntity> findAllByNameOrSynonym(String text) {
-        if (text == null || text.isBlank()) return Collections.emptySet();
-        String lowerText = text.toLowerCase();
-        return nameMap.entrySet().stream()
-                .filter(entry -> entry.getKey().contains(lowerText))
-                .map(Map.Entry::getValue)
-                .collect(Collectors.toSet());
-    }
-
-    Set<NamedEntity> findAllByCategory(String text) {
-        if (text == null || text.isBlank()) return Collections.emptySet();
-        String lowerText = text.toLowerCase();
-        return entities.stream()
-                .filter(e -> e.getCategory() != null && e.getCategory().toLowerCase().contains(lowerText))
-                .collect(Collectors.toSet());
-    }
-
-    Set<NamedEntity> findAllByTag(String text) {
-        if (text == null || text.isBlank()) return Collections.emptySet();
-        String lowerText = text.toLowerCase();
-        return entities.stream()
-                .filter(e -> e.getTags().stream().anyMatch(tag -> tag.toLowerCase().contains(lowerText)))
-                .collect(Collectors.toSet());
-    }
-
-    Set<NamedEntity> searchAllFields(String text) {
-        if (text == null || text.isBlank()) return Collections.emptySet();
-        String lowerText = text.toLowerCase();
-        Set<NamedEntity> resultSet = new HashSet<>();
-        resultSet.addAll(findAllByNameOrSynonym(lowerText));
-        resultSet.addAll(findAllByCategory(lowerText));
-        resultSet.addAll(findAllByTag(lowerText));
-        return resultSet;
-    }
-
     Set<NamedEntity> extractEntitiesByPartialName(String text) {
         if (text == null || text.isBlank()) return Collections.emptySet();
         String lowerText = text.toLowerCase();

@@ -12,7 +12,7 @@ import java.util.List;
 class EntityLoader {
     private final ObjectMapper mapper = new ObjectMapper();
     private final List<NamedEntity> entities = new ArrayList<>();
-    private final String PATH = "./ne_json";
+    private final String PATH = "./ner";
 
     List<NamedEntity> loadAndGet() {
         File folder = new File(PATH);

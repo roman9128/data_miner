@@ -15,6 +15,7 @@ public record MessageRecord(
         String chatName,
         String link,
         LocalDateTime parsedAt,
+        LocalDateTime publishedAt,
         int publishYear,
         Month publishMonth,
         int publishDayOfMonth,
@@ -29,6 +30,11 @@ public record MessageRecord(
         int wordCount,
         double averageWordLength,
         int emojiCount,
+
+        long replyToChatId,
+        long replyToMessageId,
+        long forwardOriginChatId,
+        long forwardOriginMessageId,
 
         List<Noun> nouns,
         Set<NamedEntity> namedEntities,

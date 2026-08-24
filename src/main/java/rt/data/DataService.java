@@ -12,6 +12,7 @@ import rt.data.stats.TextStatisticsCalculator;
 import rt.data.storage.SQLiteDB;
 
 import java.net.http.HttpClient;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -79,10 +80,11 @@ public class DataService {
     }
 
     private void processRawMessageRecord(RawMessageRecord rawMessageRecord) {
-        LocalDateTime messageDateTime = DateTimeUtils.getDateTime(rawMessageRecord.message().date);
         MessageTypeText messageTypeText = extractTypeAndTextFromMessage(rawMessageRecord.message());
+        MessageTies messageTies = getMessageTies(rawMessageRecord.message());
         String text = messageTypeText.text();
         TextStatistics textStatistics = TextStatisticsCalculator.calculate(text);
+        LocalDateTime messageDateTime = DateTimeUtils.getDateTime(rawMessageRecord.message().date);
 
         MessageRecord messageRecord = new MessageRecord(
                 rawMessageRecord.message().id,
@@ -90,6 +92,7 @@ public class DataService {
                 rawMessageRecord.chatName(),
                 rawMessageRecord.link(),
                 LocalDateTime.now(ZoneId.systemDefault()),
+                messageDateTime,
                 messageDateTime.getYear(),
                 messageDateTime.getMonth(),
                 messageDateTime.getDayOfMonth(),
@@ -103,6 +106,10 @@ public class DataService {
                 textStatistics.wordCount(),
                 textStatistics.averageWordLength(),
                 textStatistics.emojiCount(),
+                messageTies.replyToChatId(),
+                messageTies.replyToMessageId(),
+                messageTies.forwardOriginChatId(),
+                messageTies.forwardOriginMessageId(),
                 nounExtractor.extract(text),
                 analyzer.recognizeNE(text),
                 analyzer.classify(text)
@@ -160,5 +167,18 @@ public class DataService {
 
     private String getRidOfNull(String text) {
         return text == null ? "" : text;
+    }
+
+    private MessageTies getMessageTies(TdApi.Message message) {
+        long replyToChatId = 0, replyToMessageId = 0, forwardOriginChatId = 0, forwardOriginMessageId = 0;
+        if (message.replyTo != null && message.replyTo instanceof TdApi.MessageReplyToMessage messageReplyToMessage) {
+            replyToChatId = messageReplyToMessage.chatId;
+            replyToMessageId = messageReplyToMessage.messageId;
+        }
+        if (message.forwardInfo != null && message.forwardInfo.origin instanceof TdApi.MessageOriginChannel originChannel) {
+            forwardOriginChatId = originChannel.chatId;
+            forwardOriginMessageId = originChannel.messageId;
+        }
+        return new MessageTies(replyToChatId, replyToMessageId, forwardOriginChatId, forwardOriginMessageId);
     }
 }

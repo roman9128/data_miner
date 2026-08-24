@@ -109,7 +109,11 @@ public class Core implements ParserAssistant {
     }
 
     public int getQueueSize() {
-        return dataService.getQueueSize();
+        int queueSize = dataService.getQueueSize();
+        if (queueSize != 0) {
+            Notifier.instance().add(Notification.Level.ONLY_TO_LOG, "Сообщений в обработке: " + queueSize);
+        }
+        return queueSize;
     }
 
     private Set<Long> prepareSenderIds(Set<Long> source, Function<Integer, Collection<Long>> getFolder) {

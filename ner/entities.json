@@ -1,0 +1,83 @@
+[
+  {
+    "name": "Илон Маск",
+    "synonyms": [
+      "Elon Musk"
+    ],
+    "category": "Бизнес",
+    "tags": [
+      "CEO",
+      "Tesla",
+      "SpaceX",
+	  "Grok"
+    ]
+  },
+  {
+    "name": "Дональд Трамп",
+    "synonyms": [
+      "Трамп"
+    ],
+    "category": "Политика",
+    "tags": [
+      "Президент",
+      "США"
+    ]
+  },
+  {
+    "name": "Си Цзиньпин",
+    "synonyms": [
+      "со си"
+    ],
+    "category": "Политика",
+    "tags": [
+      "Председатель",
+      "Китай"
+    ]
+  },
+  {
+    "name": "Владимир Путин",
+    "synonyms": [
+      "пыпа", "Путин"
+    ],
+    "category": "Политика",
+    "tags": [
+      "Президент",
+      "Россия"
+    ]
+  },
+ 
+  {
+    "name": "Apple Inc.",
+    "synonyms": [
+      "Apple"
+    ],
+    "category": "Технологии",
+    "tags": [
+      "Consumer Electronics",
+      "Software"
+    ]
+  },
+  {
+    "name": "Microsoft Corporation",
+    "synonyms": [
+      "Microsoft"
+    ],
+    "category": "Технологии",
+    "tags": [
+      "Software",
+      "Cloud Computing"
+    ]
+  },
+  {
+    "name": "Facebook, Inc.",
+    "synonyms": [
+      "Facebook",
+	  "фейсбук"
+    ],
+    "category": "Технологии",
+    "tags": [
+      "Social Media",
+      "Advertising"
+    ]
+  }
+]

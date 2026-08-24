@@ -19,7 +19,7 @@ public class NounExtractor {
 
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
-    private final String url = "http://localhost:8002/keywords";
+    private final String url = "http://localhost:8002/analyze";
 
     public NounExtractor(HttpClient httpClient, ObjectMapper objectMapper) {
         this.httpClient = httpClient;

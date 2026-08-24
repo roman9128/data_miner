@@ -20,7 +20,7 @@ class NLPModelFinder {
 
     void findModels() {
 
-        String modelsDirString = "nlp_models/models";
+        String modelsDirString = "nlp/models";
         String modelExtension = "model";
         Path modelsDir = Paths.get(modelsDirString);
 
