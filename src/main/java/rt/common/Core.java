@@ -131,11 +131,10 @@ public class Core implements ParserAssistant {
     private void startParser() {
         try {
             tgClientWrapper = new TgClientWrapper(clientFactory, this);
-            Notifier.instance().add(Notification.Level.SHOW_USER, "Готов к работе");
             tgClientWrapper.waitForExit();
             Thread.sleep(100); // ожидание завершения соединения с TDLib
         } catch (Exception e) {
-            Notifier.instance().add(Notification.Level.ONLY_TO_LOG, "Исключение в главном потоке: " + e.getMessage());
+            System.err.println("Исключение в главном потоке: " + e.getMessage());
         } finally {
             closeApp();
         }

@@ -12,7 +12,7 @@ import java.util.Properties;
 public final class AppPropertiesHandler {
 
     private static final Properties properties = new Properties();
-    private static final String appPropertyFileName = "./app.properties";
+    private static final String appPropertyFileName = "./parsing.properties";
     private static int messagesToStop = 3000;
     private static int messagesToDownload = 100;
 
@@ -22,7 +22,7 @@ public final class AppPropertiesHandler {
             messagesToStop = setMessageCountParameterFrom(properties.getProperty("stop"));
             messagesToDownload = setMessageCountParameterFrom(properties.getProperty("messages"));
         } catch (Exception e) {
-            Notifier.instance().add(Notification.Level.SHOW_USER, "Не удалось загрузить параметры парсинга. Использую значения по умолчанию");
+            System.err.println("Не удалось загрузить параметры парсинга. Использую значения по умолчанию");
             createFileWithProperties();
         }
     }

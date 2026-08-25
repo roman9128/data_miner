@@ -61,6 +61,7 @@ public final class TgClientWrapper implements AutoCloseable {
                 client.send(new TdApi.CheckAuthenticationPassword(CredentialsHandler.getPassword()), authErrorHandler);
             }
             case TdApi.AuthorizationStateReady ready -> {
+                Notifier.instance().add(Notification.Level.SHOW_USER, "Готов к работе");
                 assistant.startInteractions();
             }
             case TdApi.AuthorizationStateLoggingOut loggingOut -> {

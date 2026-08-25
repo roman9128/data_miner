@@ -23,6 +23,7 @@ public class SQLiteDB {
 
     public SQLiteDB() {
         this.connector = new SQLiteConnector();
+        checkDbFolder();
         connector.createTables();
     }
 
@@ -32,6 +33,18 @@ public class SQLiteDB {
 
     public void exportToCsv() {
         connector.exportToCsv();
+    }
+
+    private void checkDbFolder() {
+        final Path dbFolder = Path.of("db");
+
+        if (!Files.exists(dbFolder)) {
+            try {
+                Files.createDirectories(dbFolder);
+            } catch (IOException e) {
+                System.err.println("Ошибка при создании папки для базы данных: " + e);
+            }
+        }
     }
 
     private class SQLiteConnector {

@@ -4,7 +4,7 @@ services:
       context: ./natasha
       dockerfile: Dockerfile
     container_name: data-miner-natasha
-    restart: unless-stopped
+    restart: no
     ports:
       - "8002:8000"
     healthcheck:

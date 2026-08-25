@@ -1,8 +1,5 @@
 package rt.common.config;
 
-import rt.common.Notifier;
-import rt.common.entities_and_dtos.Notification;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,7 +19,7 @@ public final class CredentialsHandler {
             apiHash = properties.getProperty("api.hash");
             password = properties.getProperty("password");
         } catch (IOException ex) {
-            Notifier.instance().add(Notification.Level.SHOW_USER, "Не удалось загрузить параметры для входа. Завершаю работу...");
+            System.err.println("Ошибка при загрузке параметров для входа: " + ex);
         }
     }
 
