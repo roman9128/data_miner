@@ -1,4 +1,4 @@
-package rt.data.analyzer.ner;
+package rt.data.ner;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

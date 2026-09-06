@@ -37,7 +37,7 @@ public class Core implements ParserAssistant {
         this.authUI = new AuthUI();
         this.view = new SearchWindow();
         view.setCore(this);
-        this.dataService = new DataService();
+        this.dataService = new DataService(new ExternalAPIHandler());
     }
 
     public void start() {

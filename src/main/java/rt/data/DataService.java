@@ -1,18 +1,16 @@
 package rt.data;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import it.tdlight.jni.TdApi;
+import rt.common.ExternalAPIHandler;
 import rt.common.Notifier;
 import rt.common.entities_and_dtos.*;
-import rt.common.entities_and_dtos.MessageContentType;
 import rt.common.utils.DateTimeUtils;
-import rt.data.analyzer.Analyzer;
+import rt.data.ner.NERService;
+import rt.data.nlp.NLPService;
 import rt.data.noun_extractor.NounExtractor;
 import rt.data.stats.TextStatisticsCalculator;
 import rt.data.storage.SQLiteDB;
 
-import java.net.http.HttpClient;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -21,18 +19,18 @@ import java.util.concurrent.TimeUnit;
 public class DataService {
 
     private final SQLiteDB db;
-    private final Analyzer analyzer;
+    private final NERService nerService;
+    private final NLPService nlpService;
     private final NounExtractor nounExtractor;
     private final LinkedBlockingQueue<RawMessageRecord> rawMessageRecords = new LinkedBlockingQueue<>(1000);
     private volatile boolean running = false;
 
-    public DataService() {
-        HttpClient client = HttpClient.newHttpClient();
-        ObjectMapper objectMapper = new ObjectMapper();
+    public DataService(ExternalAPIHandler apiHandler) {
 
         this.db = new SQLiteDB();
-        this.analyzer = new Analyzer();
-        this.nounExtractor = new NounExtractor(client, objectMapper);
+        nlpService = new NLPService();
+        nerService = new NERService();
+        nounExtractor = new NounExtractor(apiHandler);
     }
 
     public void exportToCSV() {
@@ -111,8 +109,8 @@ public class DataService {
                 messageTies.forwardOriginChatId(),
                 messageTies.forwardOriginMessageId(),
                 nounExtractor.extract(text),
-                analyzer.recognizeNE(text),
-                analyzer.classify(text)
+                nerService.extractEntities(text),
+                nlpService.classify(text)
         );
         db.createRecord(messageRecord);
     }

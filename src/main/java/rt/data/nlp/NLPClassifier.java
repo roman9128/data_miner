@@ -1,4 +1,4 @@
-package rt.data.analyzer.nlp;
+package rt.data.nlp;
 
 import opennlp.tools.doccat.DocumentCategorizerME;
 

@@ -1,11 +1,9 @@
-from collections import Counter
 from fastapi import FastAPI
 from natasha import (
     Segmenter,
     NewsEmbedding,
     NewsMorphTagger,
     NewsSyntaxParser,
-    NewsNERTagger,
     MorphVocab,
     Doc,
 )
@@ -16,43 +14,10 @@ segmenter = Segmenter()
 embedding = NewsEmbedding()
 morph_tagger = NewsMorphTagger(embedding)
 syntax_parser = NewsSyntaxParser(embedding)
-ner_tagger = NewsNERTagger(embedding)
 morph_vocab = MorphVocab()
-
 
 class TextRequest(BaseModel):
     text: str
-
-
-def extract_entities(doc):
-    result = []
-
-    for span in doc.spans:
-
-        if span.type not in {
-            "PER",
-            "ORG",
-            "LOC",
-        }:
-            continue
-
-        try:
-            span.normalize(morph_vocab)
-        except Exception:
-            pass
-
-        result.append({
-            "text": span.text,
-            "normalized": (
-                span.normal
-                if span.normal
-                else span.text.lower()
-            ),
-            "type": span.type
-        })
-
-    return result
-
 
 def extract_nouns(doc):
     nouns = {}
@@ -88,27 +53,38 @@ def extract_nouns(doc):
 
     return list(nouns.values())
 
+def extract_lemmas(doc):
+    lemmas = []
+
+    for token in doc.tokens:
+        token.lemmatize(morph_vocab)
+        lemma = token.lemma
+        if not lemma:
+            continue
+        lemma = lemma.strip().lower()
+        if len(lemma) < 2:
+            continue
+        lemmas.append(lemma)
+
+    return lemmas
 
 def analyze(text):
     doc = Doc(text)
-
     doc.segment(segmenter)
-
     doc.tag_morph(morph_tagger)
-
     doc.parse_syntax(syntax_parser)
-
-    doc.tag_ner(ner_tagger)
-
-    entities = extract_entities(doc)
-
     nouns = extract_nouns(doc)
-
     return {
-        "entities": entities,
         "nouns": nouns
     }
 
+def get_lemmas(text):
+    doc = Doc(text)
+    doc.segment(segmenter)
+    doc.tag_morph(morph_tagger)
+    return {
+        "lemmas": extract_lemmas(doc)
+    }
 
 @app.get("/health")
 def health():
@@ -116,37 +92,10 @@ def health():
         "status": "ok"
     }
 
-
 @app.post("/analyze")
 def analyze_endpoint(request: TextRequest):
     return analyze(request.text)
 
-
-@app.post("/debug")
-def debug_endpoint(request: TextRequest):
-    doc = Doc(request.text)
-    doc.segment(segmenter)
-    doc.tag_morph(morph_tagger)
-    doc.parse_syntax(syntax_parser)
-    doc.tag_ner(ner_tagger)
-
-    tokens = []
-
-    for token in doc.tokens:
-        morph_vocab.lemmatize(
-            token
-        )
-
-        tokens.append({
-            "text": token.text,
-            "lemma": token.lemma,
-            "pos": token.pos,
-            "rel": token.rel,
-            "head_id": token.head_id,
-            "start": token.start,
-            "stop": token.stop
-        })
-
-    return {
-        "tokens": tokens
-    }
+@app.post("/lemmas")
+def lemmas_endpoint(request: TextRequest):
+    return get_lemmas(request.text)

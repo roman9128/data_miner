@@ -1,4 +1,4 @@
-package rt.data.analyzer.nlp;
+package rt.data.nlp;
 
 import com.github.demidko.aot.WordformMeaning;
 import opennlp.tools.stemmer.snowball.SnowballStemmer;

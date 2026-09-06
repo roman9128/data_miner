@@ -1,4 +1,4 @@
-package rt.data.analyzer.ner;
+package rt.data.ner;
 
 import rt.common.entities_and_dtos.NamedEntity;
 
@@ -15,11 +15,7 @@ public class NERService {
         entityFinder.setEntities(loadedEntities);
     }
 
-    public Set<NamedEntity> extractEntitiesByPartialName(String text) {
-        return entityFinder.extractEntitiesByPartialName(text);
-    }
-
-    public Set<NamedEntity> extractEntitiesByExactName(String text) {
-        return entityFinder.extractEntitiesByExactName(text);
+    public Set<NamedEntity> extractEntities(String text) {
+        return entityFinder.extractEntities(text);
     }
 }
