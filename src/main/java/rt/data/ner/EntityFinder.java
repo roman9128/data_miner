@@ -1,7 +1,8 @@
 package rt.data.ner;
 
 import opennlp.tools.stemmer.snowball.SnowballStemmer;
-import rt.common.entities_and_dtos.NamedEntity;
+import rt.model.ne.NamedEntity;
+import rt.utils.TextUtils;
 
 import java.util.*;
 
@@ -85,12 +86,9 @@ class EntityFinder {
     private List<String> stem(String text) {
         if (text == null || text.isBlank()) return List.of();
 
-        text = text
-                .toLowerCase(Locale.ROOT)
-                .replaceAll("ё", "е")
-                .replaceAll("—", "-")
-                .replaceAll("[^\\p{L}\\p{N}\\s-]", " ");
-        String[] words = text.split("[\\s-]+");
+        String[] words = TextUtils.getWordsFrom(text);
+        if (words.length == 0) return List.of();
+
         List<String> result = new ArrayList<>();
 
         for (String word : words) {

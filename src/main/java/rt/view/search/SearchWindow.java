@@ -5,9 +5,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import rt.common.Core;
-import rt.common.Notifier;
-import rt.common.entities_and_dtos.Notification;
+import rt.core.Core;
+import rt.core.Notifier;
+import rt.model.notification.Notification;
 import rt.view.notification.NotificationUIBridge;
 
 import java.io.IOException;
@@ -80,13 +80,6 @@ public class SearchWindow {
         sourceUpdater.scheduleWithFixedDelay(() -> updateSources(controller), 5, 10, TimeUnit.SECONDS);
     }
 
-    private void startQueueUpdater(SearchController controller) {
-        queueUpdater = Executors.newSingleThreadScheduledExecutor();
-        queueUpdater.scheduleWithFixedDelay(() -> Platform.runLater(
-                () -> controller.updateQueueSize(core.getQueueSize())), 0, 1, TimeUnit.SECONDS
-        );
-    }
-
     private void updateSources(SearchController controller) {
         Map<Integer, String> folders = core.getFoldersIDsAndNames();
         Map<Long, String> channels = core.getChannelsIDsAndNames();
@@ -114,6 +107,13 @@ public class SearchWindow {
         }
         sourceUpdater.shutdownNow();
         sourceUpdater = null;
+    }
+
+    private void startQueueUpdater(SearchController controller) {
+        queueUpdater = Executors.newSingleThreadScheduledExecutor();
+        queueUpdater.scheduleWithFixedDelay(() -> Platform.runLater(
+                () -> controller.updateQueueSize(core.getQueueSize())), 0, 1, TimeUnit.SECONDS
+        );
     }
 
     private void stopQueueUpdater() {

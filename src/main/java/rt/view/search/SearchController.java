@@ -5,7 +5,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import rt.common.Core;
+import rt.core.Core;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

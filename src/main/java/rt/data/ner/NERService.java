@@ -1,6 +1,6 @@
 package rt.data.ner;
 
-import rt.common.entities_and_dtos.NamedEntity;
+import rt.model.ne.NamedEntity;
 
 import java.util.List;
 import java.util.Set;

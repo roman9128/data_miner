@@ -1,8 +1,8 @@
 package rt.telegram;
 
 import it.tdlight.jni.TdApi;
-import rt.common.Notifier;
-import rt.common.entities_and_dtos.Notification;
+import rt.core.Notifier;
+import rt.model.notification.Notification;
 
 import java.util.concurrent.ConcurrentLinkedDeque;
 

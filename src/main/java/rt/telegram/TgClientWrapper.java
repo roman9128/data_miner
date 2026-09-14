@@ -2,13 +2,13 @@ package rt.telegram;
 
 import it.tdlight.client.*;
 import it.tdlight.jni.TdApi;
-import rt.common.Notifier;
-import rt.common.ParserAssistant;
-import rt.common.config.CredentialsHandler;
-import rt.common.config.AppPropertiesHandler;
-import rt.common.entities_and_dtos.Notification;
-import rt.common.entities_and_dtos.RawMessageRecord;
-import rt.common.utils.NumberUtils;
+import rt.core.Notifier;
+import rt.core.ParserAssistant;
+import rt.core.config.CredentialsHandler;
+import rt.core.config.AppPropertiesHandler;
+import rt.model.notification.Notification;
+import rt.model.message.RawMessageRecord;
+import rt.utils.NumberUtils;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

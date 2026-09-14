@@ -2,8 +2,8 @@ package rt.data.nlp;
 
 import opennlp.tools.doccat.DoccatModel;
 import opennlp.tools.doccat.DocumentCategorizerME;
-import rt.common.Notifier;
-import rt.common.entities_and_dtos.Notification;
+import rt.core.Notifier;
+import rt.model.notification.Notification;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +20,7 @@ class NLPModelFinder {
 
     void findModels() {
 
-        String modelsDirString = "nlp/models";
+        String modelsDirString = "ai/nlp/models";
         String modelExtension = "model";
         Path modelsDir = Paths.get(modelsDirString);
 

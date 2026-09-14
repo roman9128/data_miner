@@ -1,9 +1,10 @@
 package rt.data.noun_extractor;
 
-import rt.common.ExternalAPIHandler;
-import rt.common.Notifier;
-import rt.common.entities_and_dtos.Notification;
-import rt.common.entities_and_dtos.Noun;
+import rt.api.ExternalAPIHandler;
+import rt.core.Notifier;
+import rt.model.notification.Notification;
+import rt.model.noun.Noun;
+import rt.utils.TextUtils;
 
 import java.util.List;
 
@@ -17,9 +18,9 @@ public class NounExtractor {
 
     public List<Noun> extract(String text) {
         try {
-            return externalAPIHandler.getNouns(text);
+            return externalAPIHandler.getNouns(TextUtils.normalize(text));
         } catch (Exception e) {
-            Notifier.instance().add(Notification.Level.SHOW_USER, e.toString());
+            Notifier.instance().add(Notification.Level.ONLY_TO_LOG, "Ошибка: " + e + "\nНевозможно извлечь существительные из текста: " + text);
             return List.of();
         }
     }

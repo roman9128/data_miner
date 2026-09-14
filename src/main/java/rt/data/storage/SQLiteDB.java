@@ -1,10 +1,12 @@
 package rt.data.storage;
 
-import rt.common.Notifier;
-import rt.common.entities_and_dtos.MessageRecord;
-import rt.common.entities_and_dtos.NamedEntity;
-import rt.common.entities_and_dtos.Notification;
-import rt.common.entities_and_dtos.Noun;
+import rt.core.Notifier;
+import rt.model.message.InfoToShow;
+import rt.model.message.MessageRecord;
+import rt.model.ne.NamedEntity;
+import rt.model.notification.Notification;
+import rt.model.noun.Noun;
+import rt.data.embedder.VectorUtils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -13,9 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.*;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class SQLiteDB {
 
@@ -28,11 +28,37 @@ public class SQLiteDB {
     }
 
     public void createRecord(MessageRecord messageRecord) {
-        connector.addRecord(messageRecord);
+        try {
+            connector.addRecord(messageRecord);
+        } catch (SQLException e) {
+            Notifier.instance().add(Notification.Level.SHOW_USER, e.getMessage());
+        }
     }
 
     public void exportToCsv() {
-        connector.exportToCsv();
+        try {
+            connector.exportToCsv();
+        } catch (Exception e) {
+            Notifier.instance().add(Notification.Level.SHOW_USER, e.getMessage());
+        }
+    }
+
+    public Map<Long, float[]> getEmbeddings() {
+        try {
+            return connector.getAllMessageEmbeddingsAsMap();
+        } catch (SQLException e) {
+            Notifier.instance().add(Notification.Level.SHOW_USER, e.getMessage());
+            return Map.of();
+        }
+    }
+
+    public List<InfoToShow> getMessagesByIds(Collection<Long> ids) {
+        try {
+            return connector.getMessagesByIds(List.copyOf(ids));
+        } catch (SQLException e) {
+            Notifier.instance().add(Notification.Level.SHOW_USER, e.getMessage());
+            return List.of();
+        }
     }
 
     private void checkDbFolder() {
@@ -47,7 +73,7 @@ public class SQLiteDB {
         }
     }
 
-    private class SQLiteConnector {
+    private static class SQLiteConnector {
 
         private final String DB_URL = "jdbc:sqlite:./db/records.db";
         private final Path exportDirectory = Path.of("dataset");
@@ -86,6 +112,8 @@ public class SQLiteDB {
                         reply_to_message_id       INTEGER NOT NULL,
                         forward_origin_chat_id    INTEGER NOT NULL,
                         forward_origin_message_id INTEGER NOT NULL,
+                    
+                        embedding                 BLOB,
                     
                         UNIQUE (
                             telegram_message_id,
@@ -244,14 +272,11 @@ public class SQLiteDB {
                 statement.execute(createMessageTopicsTable);
 
             } catch (SQLException e) {
-                throw new RuntimeException(
-                        "Ошибка создания таблиц SQLite",
-                        e
-                );
+                throw new RuntimeException("Ошибка создания таблиц SQLite", e);
             }
         }
 
-        private void addRecord(MessageRecord messageRecord) {
+        private void addRecord(MessageRecord messageRecord) throws SQLException {
 
             try (Connection connection = DriverManager.getConnection(DB_URL)) {
 
@@ -276,17 +301,14 @@ public class SQLiteDB {
                     } catch (SQLException rollbackException) {
                         e.addSuppressed(rollbackException);
                     }
-                    Notifier.instance().add(Notification.Level.SHOW_USER,
+                    throw new SQLException(
                             "Ошибка сохранения сообщения: " +
                                     messageRecord.messageId() +
                                     ", chatId=" +
                                     messageRecord.chatId() + ": " + e);
                 }
             } catch (SQLException e) {
-                Notifier.instance().add(
-                        Notification.Level.SHOW_USER,
-                        "Ошибка подключения к SQLite: " + e
-                );
+                throw new SQLException("Ошибка подключения к SQLite: " + e);
             }
         }
 
@@ -318,12 +340,14 @@ public class SQLiteDB {
                         reply_to_chat_id,
                         reply_to_message_id,
                         forward_origin_chat_id,
-                        forward_origin_message_id
+                        forward_origin_message_id,
+                        embedding
                     )
                     VALUES (
                         ?, ?, ?, ?, ?,
                         ?, ?, ?, ?, ?, ?, ?, ?,
-                        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                        ?
                     )
                     ON CONFLICT (
                         telegram_message_id,
@@ -352,7 +376,8 @@ public class SQLiteDB {
                         reply_to_chat_id = excluded.reply_to_chat_id,
                         reply_to_message_id = excluded.reply_to_message_id,
                         forward_origin_chat_id = excluded.forward_origin_chat_id,
-                        forward_origin_message_id = excluded.forward_origin_message_id
+                        forward_origin_message_id = excluded.forward_origin_message_id,
+                        embedding = excluded.embedding
                     """;
 
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -382,6 +407,13 @@ public class SQLiteDB {
                 statement.setLong(i++, messageRecord.replyToMessageId());
                 statement.setLong(i++, messageRecord.forwardOriginChatId());
                 statement.setLong(i++, messageRecord.forwardOriginMessageId());
+
+                float[] vector = messageRecord.embedding();
+                if (vector != null && vector.length > 0) {
+                    statement.setBytes(i++, VectorUtils.floatArrayToByteArray(vector));
+                } else {
+                    statement.setBytes(i++, null);
+                }
 
                 statement.executeUpdate();
             }
@@ -700,13 +732,8 @@ public class SQLiteDB {
             }
         }
 
-        private void exportToCsv() {
-            try {
-                Files.createDirectories(exportDirectory);
-            } catch (IOException e) {
-                Notifier.instance().add(Notification.Level.SHOW_USER, "Не удалось создать директорию dataset " + e);
-                return;
-            }
+        private void exportToCsv() throws SQLException, IOException {
+            Files.createDirectories(exportDirectory);
 
             String[] tables = {
                     "messages",
@@ -723,8 +750,6 @@ public class SQLiteDB {
                 for (String table : tables) {
                     exportTableToCsv(connection, table, exportDirectory);
                 }
-            } catch (Exception e) {
-                Notifier.instance().add(Notification.Level.SHOW_USER, "Ошибка экспорта SQLite в CSV " + e);
             }
         }
 
@@ -740,7 +765,13 @@ public class SQLiteDB {
                     if (i > 1) {
                         writer.write(";");
                     }
-                    writer.write(csvEscape(metadata.getColumnName(i)));
+                    String columnName = metadata.getColumnName(i);
+                    String columnType = metadata.getColumnTypeName(i);
+                    if ("BLOB".equalsIgnoreCase(columnType)) {
+                        writer.write(csvEscape(columnName + "_BLOB"));
+                    } else {
+                        writer.write(csvEscape(columnName));
+                    }
                 }
                 writer.newLine();
                 while (resultSet.next()) {
@@ -748,9 +779,14 @@ public class SQLiteDB {
                         if (i > 1) {
                             writer.write(";");
                         }
-                        Object value = resultSet.getObject(i);
-                        if (value != null) {
-                            writer.write(csvEscape(value.toString()));
+                        String columnType = metadata.getColumnTypeName(i);
+                        if ("BLOB".equalsIgnoreCase(columnType)) {
+                            writer.write("[BLOB]");
+                        } else {
+                            Object value = resultSet.getObject(i);
+                            if (value != null) {
+                                writer.write(csvEscape(value.toString()));
+                            }
                         }
                     }
                     writer.newLine();
@@ -767,6 +803,70 @@ public class SQLiteDB {
                 return "\"" + escaped + "\"";
             }
             return escaped;
+        }
+
+        private Map<Long, float[]> getAllMessageEmbeddingsAsMap() throws SQLException {
+            String sql = "SELECT id, embedding FROM messages WHERE embedding IS NOT NULL";
+            Map<Long, float[]> embeddings = new HashMap<>();
+
+            try (Connection connection = DriverManager.getConnection(DB_URL);
+                 Statement statement = connection.createStatement();
+                 ResultSet resultSet = statement.executeQuery(sql)) {
+
+                while (resultSet.next()) {
+                    long id = resultSet.getLong("id");
+                    float[] embedding = VectorUtils.byteArrayToFloatArray(resultSet.getBytes("embedding"));
+                    embeddings.put(id, embedding);
+                }
+            }
+            return embeddings;
+        }
+
+        private List<InfoToShow> getMessagesByIds(List<Long> messageIds) throws SQLException {
+            if (messageIds == null || messageIds.isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            List<InfoToShow> messages = new ArrayList<>();
+            int batchSize = 900;
+
+            for (int i = 0; i < messageIds.size(); i += batchSize) {
+                List<Long> batch = messageIds.subList(i, Math.min(i + batchSize, messageIds.size()));
+                messages.addAll(getMessagesByIdsBatch(batch));
+            }
+
+            return messages;
+        }
+
+        private List<InfoToShow> getMessagesByIdsBatch(List<Long> messageIds) throws SQLException {
+            String placeholders = String.join(",", Collections.nCopies(messageIds.size(), "?"));
+            String sql = "SELECT text, link, published_at, chat_name FROM messages WHERE id IN (" + placeholders + ")";
+
+            List<InfoToShow> messages = new ArrayList<>();
+
+            try (Connection connection = DriverManager.getConnection(DB_URL);
+                 PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+                for (int i = 0; i < messageIds.size(); i++) {
+                    preparedStatement.setLong(i + 1, messageIds.get(i));
+                }
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        messages.add(new InfoToShow(
+                                resultSet.getString("text"),
+                                resultSet.getString("link"),
+                                resultSet.getString("published_at"),
+                                resultSet.getString("chat_name")
+                        ));
+                    }
+                }
+
+            } catch (SQLException e) {
+                throw new SQLException("Ошибка получения сообщений по списку id", e);
+            }
+
+            return messages;
         }
     }
 }

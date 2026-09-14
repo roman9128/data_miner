@@ -1,3 +1,0 @@
-docker build -t natasha-service .
-docker rm -f natasha-service
-docker run --name natasha-service -p 8002:8000 natasha-service

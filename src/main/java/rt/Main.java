@@ -1,6 +1,6 @@
 package rt;
 
-import rt.common.Core;
+import rt.core.Core;
 
 public class Main {
 

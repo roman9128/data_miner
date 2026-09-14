@@ -1,7 +1,7 @@
 package rt.view.notification;
 
 import javafx.application.Platform;
-import rt.common.Notifier;
+import rt.core.Notifier;
 import rt.view.search.SearchController;
 
 public class NotificationUIBridge {

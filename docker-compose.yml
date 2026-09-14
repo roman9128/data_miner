@@ -1,7 +1,7 @@
 services:
   natasha:
     build:
-      context: ./natasha
+      context: ./ai/natasha
       dockerfile: Dockerfile
     container_name: data-miner-natasha
     restart: no
