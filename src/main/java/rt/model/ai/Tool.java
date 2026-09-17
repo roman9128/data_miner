@@ -16,6 +16,8 @@ public interface Tool {
 
     String execute(String arguments);
 
+    void setQueryContext(QueryContext queryContext);
+
     @JsonValue
     default Map<String, Object> toJson() {
         return Map.of(

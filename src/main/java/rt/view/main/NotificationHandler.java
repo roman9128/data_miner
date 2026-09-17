@@ -1,23 +1,22 @@
-package rt.view.notification;
+package rt.view.main;
 
 import javafx.application.Platform;
 import rt.core.Notifier;
-import rt.view.search.SearchController;
 
-public class NotificationUIBridge {
+public class NotificationHandler {
 
     private volatile boolean running = false;
     private Thread notificationThread;
-    private SearchController controller;
+    private MainController controller;
 
-    public NotificationUIBridge() {
+    NotificationHandler() {
     }
 
-    public void setController(SearchController controller) {
+    void setController(MainController controller) {
         this.controller = controller;
     }
 
-    public void start() {
+    void start() {
         if (running) {
             return;
         }
@@ -29,7 +28,7 @@ public class NotificationUIBridge {
                     if (text == null || text.isBlank()) {
                         continue;
                     }
-                    SearchController currentController = controller;
+                    MainController currentController = controller;
                     if (currentController == null) {
                         continue;
                     }
@@ -39,12 +38,12 @@ public class NotificationUIBridge {
                     break;
                 }
             }
-        }, "NotificationUIBridge-Thread");
+        }, "NotificationHandler-Thread");
         notificationThread.setDaemon(true);
         notificationThread.start();
     }
 
-    public void stop() {
+    void stop() {
         running = false;
         if (notificationThread != null) {
             notificationThread.interrupt();

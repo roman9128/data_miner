@@ -19,15 +19,15 @@ import java.util.Map;
 public class ExternalAPIHandler {
 
     private final HttpClient client = HttpClient.newHttpClient();
-    private final String embed = "http://127.0.0.1:8001/embed";
-    private final String healthEmbeddingService = "http://127.0.0.1:8001/health";
-    private final String lemmas = "http://127.0.0.1:8002/lemmas";
-    private final String analyze = "http://127.0.0.1:8002/analyze";
-    private final String healthNounExtractor = "http://127.0.0.1:8002/health";
-    private final String ai = "http://192.168.0.33:11434/v1";
+    private final String EMBED = "http://127.0.0.1:8001/embed";
+    private final String HEALTH_EMBED = "http://127.0.0.1:8001/health";
+    private final String LEMMAS = "http://127.0.0.1:8002/lemmas";
+    private final String NOUNS = "http://127.0.0.1:8002/analyze";
+    private final String HEALTH_NOUNS = "http://127.0.0.1:8002/health";
+    private final String AI = "http://192.168.0.33:11434/v1/chat/completions";
 
     public boolean checkNounExtractorsHealth() {
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(healthNounExtractor)).GET().build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(HEALTH_NOUNS)).GET().build();
 
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -39,7 +39,7 @@ public class ExternalAPIHandler {
     }
 
     public boolean checkEmbeddingServicesHealth() {
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(healthEmbeddingService)).GET().build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(HEALTH_EMBED)).GET().build();
 
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -53,7 +53,7 @@ public class ExternalAPIHandler {
     public List<Noun> getNouns(String text) throws IOException, InterruptedException {
         String json = JsonUtils.makeJson(Map.of("text", text));
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(analyze))
+                .uri(URI.create(NOUNS))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
@@ -65,7 +65,7 @@ public class ExternalAPIHandler {
     public List<String> getLemmas(String text) throws IOException, InterruptedException {
         String json = JsonUtils.makeJson(Map.of("text", text));
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(lemmas))
+                .uri(URI.create(LEMMAS))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
@@ -78,7 +78,7 @@ public class ExternalAPIHandler {
         String json = JsonUtils.makeJson(Map.of("inputs", texts));
         byte[] body = json.getBytes(StandardCharsets.UTF_8);
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(embed))
+                .uri(URI.create(EMBED))
                 .version(HttpClient.Version.HTTP_1_1)
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofByteArray(body))
@@ -91,7 +91,7 @@ public class ExternalAPIHandler {
     public Dialogue chat(Dialogue dialogue) throws IOException, InterruptedException {
         String json = JsonUtils.makeJson(dialogue);
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(ai + "/chat/completions"))
+                .uri(URI.create(AI))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();

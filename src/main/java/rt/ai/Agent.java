@@ -1,6 +1,7 @@
 package rt.ai;
 
 import rt.api.ExternalAPIHandler;
+import rt.core.AgentAssistant;
 import rt.data.embedder.EmbeddingClient;
 import rt.data.storage.SQLiteDB;
 import rt.model.ai.*;
@@ -10,15 +11,20 @@ import java.util.List;
 
 public class Agent {
 
+    private final AgentAssistant assistant;
     private final ExternalAPIHandler api;
     private Dialogue dialogue;
+    private final List<Tool> availableTools;
     private static final int MAX_ITERATIONS = 10;
+    private boolean isThinking;
 
-    public Agent(ExternalAPIHandler api, SQLiteDB db, EmbeddingClient embeddingClient) {
+    public Agent(ExternalAPIHandler api, SQLiteDB db, EmbeddingClient embeddingClient, AgentAssistant assistant) {
+        this.assistant = assistant;
         this.api = api;
-
-        List<Tool> availableTools = List.of(new SearchMessagesTool(db, embeddingClient));
-
+        this.availableTools = List.of(
+                new SearchMessagesTool(db, embeddingClient),
+                new DatabaseStatsTool(db)
+        );
         this.dialogue = new Dialogue.Builder()
                 .setModel(Model.GPT_OSS)
                 .addSystemMessage("""
@@ -33,15 +39,23 @@ public class Agent {
                 .build();
     }
 
-    public String ask(String question) throws IOException, InterruptedException {
+    public void ask(String question) {
+        if (isThinking) return;
+        isThinking = true;
         int iteration = 0;
         dialogue.addUserMessage(question);
         while (iteration < MAX_ITERATIONS) {
             iteration++;
-            dialogue = api.chat(dialogue);
+            try {
+                dialogue = api.chat(dialogue);
+            } catch (IOException | InterruptedException e) {
+                answer("Не удалось обработать Ваш запрос: " + e);
+                return;
+            }
             AiChatMessage aiChatMessage = dialogue.getMessages().getLast();
             if (aiChatMessage.toolCalls() == null || aiChatMessage.toolCalls().isEmpty()) {
-                return aiChatMessage.content();
+                answer(aiChatMessage.content());
+                return;
             }
             for (ToolCall call : aiChatMessage.toolCalls()) {
                 Tool tool = dialogue.getTool(call.name());
@@ -54,10 +68,23 @@ public class Agent {
             }
         }
         dialogue.addAssistantMessage("Ничего не найдено");
-        return "Ничего не найдено";
+        answer("Ничего не найдено");
+    }
+
+    private void answer(String answer) {
+        isThinking = false;
+        assistant.sendAnswer(answer);
     }
 
     public void clearChat() {
         dialogue.clearChat();
+    }
+
+    public boolean isThinking(){
+        return isThinking;
+    }
+
+    public void setQueryContext(QueryContext queryContext) {
+        availableTools.forEach(t -> t.setQueryContext(queryContext));
     }
 }

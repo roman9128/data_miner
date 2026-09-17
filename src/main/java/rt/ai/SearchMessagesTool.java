@@ -3,6 +3,7 @@ package rt.ai;
 import rt.data.embedder.EmbeddingClient;
 import rt.data.embedder.VectorUtils;
 import rt.data.storage.SQLiteDB;
+import rt.model.ai.QueryContext;
 import rt.model.ai.Tool;
 import rt.model.message.InfoToShow;
 
@@ -16,6 +17,7 @@ public class SearchMessagesTool implements Tool {
 
     private final SQLiteDB db;
     private final EmbeddingClient embeddingClient;
+    private QueryContext queryContext;
 
     public SearchMessagesTool(SQLiteDB db, EmbeddingClient embeddingClient) {
         this.db = db;
@@ -39,6 +41,11 @@ public class SearchMessagesTool implements Tool {
                 The query should clearly express the user's search intent and include the key information to find.
                 Semantic search is available only for Russian-language content.
                 The tool returns a list of matching messages with their link, chat name, text, and date of publishing.
+                
+                IMPORTANT:
+                Never use semantic search to retrieve the entire database.
+                Semantic search is for finding messages relevant to a specific information need.
+                For requests about the database as a whole, use get_database_stats only.
                 """;
     }
 
@@ -60,8 +67,6 @@ public class SearchMessagesTool implements Tool {
 
     @Override
     public String execute(String arguments) {
-        System.out.println("Tool arguments: " + arguments);
-
         List<InfoToShow> messagesFoundBySemantic = findBySemantic(arguments);
         if (messagesFoundBySemantic.isEmpty()) return "";
         StringBuilder sb = new StringBuilder();
@@ -81,14 +86,14 @@ public class SearchMessagesTool implements Tool {
         float[] queryEmb = embeddingClient.createEmbedding(query);
         if (queryEmb.length == 0) return List.of();
 
-        Map<Long, float[]> messagesEmb = db.getEmbeddings();
+        Map<Long, float[]> messagesEmb = db.getMessageIdsAndEmbeddings(queryContext);
         Map<Long, Double> highSimilarityMessageIds = new LinkedHashMap<>();
         Map<Long, Double> mediumSimilarityMessageIds = new LinkedHashMap<>();
 
         for (Map.Entry<Long, float[]> entry : messagesEmb.entrySet()) {
             double similarity = VectorUtils.cosineSimilarity(queryEmb, entry.getValue());
             if (similarity >= 0.75) highSimilarityMessageIds.put(entry.getKey(), similarity);
-            else if (similarity >= 0.45) mediumSimilarityMessageIds.put(entry.getKey(), similarity);
+            else if (similarity >= 0.5) mediumSimilarityMessageIds.put(entry.getKey(), similarity);
         }
 
         int minimumResults = 20;
@@ -113,5 +118,10 @@ public class SearchMessagesTool implements Tool {
                         (a, b) -> a,
                         LinkedHashMap::new
                 ));
+    }
+
+    @Override
+    public void setQueryContext(QueryContext queryContext) {
+        this.queryContext = queryContext;
     }
 }

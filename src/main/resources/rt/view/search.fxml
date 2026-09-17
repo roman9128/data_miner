@@ -3,7 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox prefWidth="457.0" spacing="15" style="             -fx-background-color: #f3f4f6;             -fx-padding: 20;         " xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="rt.view.search.SearchController">
+<VBox prefWidth="457.0" spacing="15" style="             -fx-background-color: #f3f4f6;             -fx-padding: 20;         " xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="rt.view.main.MainController">
 
 
     <!-- Заголовок -->

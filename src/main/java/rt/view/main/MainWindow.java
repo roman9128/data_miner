@@ -1,4 +1,4 @@
-package rt.view.search;
+package rt.view.main;
 
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -8,7 +8,6 @@ import javafx.stage.Stage;
 import rt.core.Core;
 import rt.core.Notifier;
 import rt.model.notification.Notification;
-import rt.view.notification.NotificationUIBridge;
 
 import java.io.IOException;
 import java.util.Map;
@@ -16,13 +15,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class SearchWindow {
+public class MainWindow {
 
     private Core core;
     private Stage stage;
+    private MainController mainController;
     private ScheduledExecutorService sourceUpdater;
     private ScheduledExecutorService queueUpdater;
-    private NotificationUIBridge notificationUIBridge;
+    private NotificationHandler notificationHandler;
     private Map<Integer, String> lastFolders = Map.of();
     private Map<Long, String> lastChannels = Map.of();
 
@@ -43,30 +43,37 @@ public class SearchWindow {
         });
     }
 
+    public void showAgentsAnswer(String answer) {
+        mainController.showAgentsAnswer(answer);
+    }
+
     private void show() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/rt/view/search.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/rt/view/new_search.fxml"));
         Parent root = loader.load();
-        SearchController controller = loader.getController();
+        mainController = loader.getController();
         stage = new Stage();
         stage.setTitle("Telegram Data Miner");
-        stage.setScene(new Scene(root, 700, 700));
-        controller.setCore(core);
-        controller.setStage(stage);
-        notificationUIBridge = new NotificationUIBridge();
-        notificationUIBridge.setController(controller);
-        notificationUIBridge.start();
-        updateSources(controller);
-        startSourceUpdater(controller);
-        startQueueUpdater(controller);
+        Scene scene = new Scene(root, 700, 800);
+        scene.getStylesheets().add(getClass().getResource("/rt/view/search.css").toExternalForm());
+        stage.setScene(scene);
+        stage.setMinWidth(700);
+        stage.setMinHeight(800);
+        mainController.setCore(core);
+        notificationHandler = new NotificationHandler();
+        notificationHandler.setController(mainController);
+        notificationHandler.start();
+        updateSources(mainController);
+        startSourceUpdater(mainController);
+        startQueueUpdater(mainController);
         stage.show();
         stage.setOnCloseRequest(event -> {
             event.consume();
             Platform.runLater(() -> {
                 stopSourceUpdater();
                 stopQueueUpdater();
-                if (notificationUIBridge != null) {
-                    notificationUIBridge.stop();
-                    notificationUIBridge = null;
+                if (notificationHandler != null) {
+                    notificationHandler.stop();
+                    notificationHandler = null;
                 }
                 core.close();
                 stage.close();
@@ -75,12 +82,12 @@ public class SearchWindow {
         });
     }
 
-    private void startSourceUpdater(SearchController controller) {
+    private void startSourceUpdater(MainController controller) {
         sourceUpdater = Executors.newSingleThreadScheduledExecutor();
         sourceUpdater.scheduleWithFixedDelay(() -> updateSources(controller), 5, 10, TimeUnit.SECONDS);
     }
 
-    private void updateSources(SearchController controller) {
+    private void updateSources(MainController controller) {
         Map<Integer, String> folders = core.getFoldersIDsAndNames();
         Map<Long, String> channels = core.getChannelsIDsAndNames();
         boolean foldersChanged = !folders.equals(lastFolders);
@@ -109,7 +116,7 @@ public class SearchWindow {
         sourceUpdater = null;
     }
 
-    private void startQueueUpdater(SearchController controller) {
+    private void startQueueUpdater(MainController controller) {
         queueUpdater = Executors.newSingleThreadScheduledExecutor();
         queueUpdater.scheduleWithFixedDelay(() -> Platform.runLater(
                 () -> controller.updateQueueSize(core.getQueueSize())), 0, 1, TimeUnit.SECONDS

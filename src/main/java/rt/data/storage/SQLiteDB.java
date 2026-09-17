@@ -1,12 +1,14 @@
 package rt.data.storage;
 
 import rt.core.Notifier;
+import rt.data.embedder.VectorUtils;
+import rt.model.ai.QueryContext;
+import rt.model.db_stats.DatabaseStats;
 import rt.model.message.InfoToShow;
 import rt.model.message.MessageRecord;
 import rt.model.ne.NamedEntity;
 import rt.model.notification.Notification;
 import rt.model.noun.Noun;
-import rt.data.embedder.VectorUtils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -14,8 +16,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class SQLiteDB {
 
@@ -43,9 +48,9 @@ public class SQLiteDB {
         }
     }
 
-    public Map<Long, float[]> getEmbeddings() {
+    public Map<Long, float[]> getMessageIdsAndEmbeddings(QueryContext queryContext) {
         try {
-            return connector.getAllMessageEmbeddingsAsMap();
+            return connector.getMessageIdsAndEmbeddingsAsMap(queryContext);
         } catch (SQLException e) {
             Notifier.instance().add(Notification.Level.SHOW_USER, e.getMessage());
             return Map.of();
@@ -58,6 +63,25 @@ public class SQLiteDB {
         } catch (SQLException e) {
             Notifier.instance().add(Notification.Level.SHOW_USER, e.getMessage());
             return List.of();
+        }
+    }
+
+    public DatabaseStats getDatabaseStats(QueryContext queryContext) {
+        try {
+            return connector.getDatabaseStats(queryContext);
+        } catch (SQLException e) {
+            Notifier.instance().add(Notification.Level.SHOW_USER, e.getMessage());
+            return new DatabaseStats(
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    null,
+                    null,
+                    Map.of(),
+                    Map.of()
+            );
         }
     }
 
@@ -805,18 +829,27 @@ public class SQLiteDB {
             return escaped;
         }
 
-        private Map<Long, float[]> getAllMessageEmbeddingsAsMap() throws SQLException {
-            String sql = "SELECT id, embedding FROM messages WHERE embedding IS NOT NULL";
+        private Map<Long, float[]> getMessageIdsAndEmbeddingsAsMap(QueryContext queryContext) throws SQLException {
+            SqlFilter filter = buildMessageFilter(queryContext);
+            String sql = """
+                    SELECT m.id, m.embedding
+                    FROM messages m
+                    %s
+                    """.formatted(
+                    filter.whereClause().isEmpty()
+                            ? "WHERE m.embedding IS NOT NULL"
+                            : filter.whereClause() + " AND m.embedding IS NOT NULL"
+            );
             Map<Long, float[]> embeddings = new HashMap<>();
-
             try (Connection connection = DriverManager.getConnection(DB_URL);
-                 Statement statement = connection.createStatement();
-                 ResultSet resultSet = statement.executeQuery(sql)) {
-
-                while (resultSet.next()) {
-                    long id = resultSet.getLong("id");
-                    float[] embedding = VectorUtils.byteArrayToFloatArray(resultSet.getBytes("embedding"));
-                    embeddings.put(id, embedding);
+                 PreparedStatement statement = connection.prepareStatement(sql)) {
+                setParameters(statement, filter.parameters());
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    while (resultSet.next()) {
+                        long id = resultSet.getLong("id");
+                        float[] embedding = VectorUtils.byteArrayToFloatArray(resultSet.getBytes("embedding"));
+                        embeddings.put(id, embedding);
+                    }
                 }
             }
             return embeddings;
@@ -868,5 +901,361 @@ public class SQLiteDB {
 
             return messages;
         }
+
+        private DatabaseStats getDatabaseStats(QueryContext context) throws SQLException {
+            SqlFilter filter = buildMessageFilter(context);
+            long messageCount;
+            long chatCount;
+            long entityCount;
+            long topicCount;
+            long activeDayCount;
+            LocalDateTime firstMessageAt;
+            LocalDateTime lastMessageAt;
+            Map<String, Long> messagesByTopic;
+            Map<String, Long> messagesByEntity;
+
+            try (Connection connection = DriverManager.getConnection(DB_URL)) {
+                String countsSql = """
+                        WITH filtered_messages AS (
+                            SELECT m.*
+                            FROM messages m
+                            %s
+                        )
+                        SELECT
+                            COUNT(*) AS message_count,
+                            COUNT(DISTINCT telegram_chat_id) AS chat_count,
+                            (
+                                SELECT COUNT(DISTINCT me.entity_id)
+                                FROM message_entities me
+                                JOIN filtered_messages fm
+                                    ON fm.id = me.message_id
+                            ) AS entity_count,
+                            (
+                                SELECT COUNT(DISTINCT mt.topic_id)
+                                FROM message_topics mt
+                                JOIN filtered_messages fm
+                                    ON fm.id = mt.message_id
+                            ) AS topic_count,
+                            COUNT(DISTINCT
+                                publish_year || '-' ||
+                                publish_month || '-' ||
+                                publish_day
+                            ) AS active_day_count
+                        FROM filtered_messages
+                        """.formatted(filter.whereClause());
+
+                try (PreparedStatement statement = connection.prepareStatement(countsSql)) {
+                    setParameters(statement, filter.parameters());
+                    try (ResultSet resultSet = statement.executeQuery()) {
+                        if (!resultSet.next()) {
+                            throw new SQLException("Не удалось получить статистику базы данных");
+                        }
+                        messageCount = resultSet.getLong("message_count");
+                        chatCount = resultSet.getLong("chat_count");
+                        entityCount = resultSet.getLong("entity_count");
+                        topicCount = resultSet.getLong("topic_count");
+                        activeDayCount = resultSet.getLong("active_day_count");
+                    }
+                }
+
+                String firstMessageSql = """
+                        SELECT
+                            publish_year,
+                            publish_month,
+                            publish_day,
+                            publish_hour,
+                            publish_minute,
+                            publish_second
+                        FROM messages m
+                        %s
+                        ORDER BY
+                            publish_year,
+                            publish_month,
+                            publish_day,
+                            publish_hour,
+                            publish_minute,
+                            publish_second
+                        LIMIT 1
+                        """.formatted(filter.whereClause());
+
+                try (PreparedStatement statement = connection.prepareStatement(firstMessageSql)) {
+                    setParameters(statement, filter.parameters());
+                    try (ResultSet resultSet = statement.executeQuery()) {
+                        if (resultSet.next()) {
+                            firstMessageAt = LocalDateTime.of(
+                                    resultSet.getInt("publish_year"),
+                                    resultSet.getInt("publish_month"),
+                                    resultSet.getInt("publish_day"),
+                                    resultSet.getInt("publish_hour"),
+                                    resultSet.getInt("publish_minute"),
+                                    resultSet.getInt("publish_second")
+                            );
+                        } else {
+                            firstMessageAt = null;
+                        }
+                    }
+                }
+
+                String lastMessageSql = """
+                        SELECT
+                            publish_year,
+                            publish_month,
+                            publish_day,
+                            publish_hour,
+                            publish_minute,
+                            publish_second
+                        FROM messages m
+                        %s
+                        ORDER BY
+                            publish_year DESC,
+                            publish_month DESC,
+                            publish_day DESC,
+                            publish_hour DESC,
+                            publish_minute DESC,
+                            publish_second DESC
+                        LIMIT 1
+                        """.formatted(filter.whereClause());
+
+                try (PreparedStatement statement = connection.prepareStatement(lastMessageSql)) {
+                    setParameters(statement, filter.parameters());
+                    try (ResultSet resultSet = statement.executeQuery()) {
+                        if (resultSet.next()) {
+                            lastMessageAt = LocalDateTime.of(
+                                    resultSet.getInt("publish_year"),
+                                    resultSet.getInt("publish_month"),
+                                    resultSet.getInt("publish_day"),
+                                    resultSet.getInt("publish_hour"),
+                                    resultSet.getInt("publish_minute"),
+                                    resultSet.getInt("publish_second")
+                            );
+                        } else {
+                            lastMessageAt = null;
+                        }
+                    }
+                }
+                messagesByTopic = getMessagesByTopic(connection, filter);
+                messagesByEntity = getMessagesByEntity(connection, filter);
+            }
+
+            return new DatabaseStats(
+                    messageCount,
+                    chatCount,
+                    entityCount,
+                    topicCount,
+                    activeDayCount,
+                    firstMessageAt,
+                    lastMessageAt,
+                    messagesByTopic,
+                    messagesByEntity
+            );
+        }
+
+        private SqlFilter buildMessageFilter(QueryContext context) {
+            if (context == null) {
+                return new SqlFilter("", List.of());
+            }
+            List<String> conditions = new ArrayList<>();
+            List<Object> parameters = new ArrayList<>();
+            if (context.chatIds() != null && !context.chatIds().isEmpty()) {
+
+                String placeholders = context.chatIds().stream()
+                        .map(id -> "?")
+                        .collect(Collectors.joining(", "));
+                conditions.add("m.telegram_chat_id IN (" + placeholders + ")");
+                parameters.addAll(context.chatIds());
+            }
+
+            if (context.dateFrom() != null) {
+                LocalDate dateFrom = context.dateFrom();
+                conditions.add("""
+                        (
+                            m.publish_year > ?
+                            OR (
+                                m.publish_year = ?
+                                AND m.publish_month > ?
+                            )
+                            OR (
+                                m.publish_year = ?
+                                AND m.publish_month = ?
+                                AND m.publish_day >= ?
+                            )
+                        )
+                        """);
+
+                parameters.add(dateFrom.getYear());
+                parameters.add(dateFrom.getYear());
+                parameters.add(dateFrom.getMonthValue());
+                parameters.add(dateFrom.getYear());
+                parameters.add(dateFrom.getMonthValue());
+                parameters.add(dateFrom.getDayOfMonth());
+            }
+
+            if (context.dateTo() != null) {
+                LocalDate dateTo = context.dateTo();
+                conditions.add("""
+                        (
+                            m.publish_year < ?
+                            OR (
+                                m.publish_year = ?
+                                AND m.publish_month < ?
+                            )
+                            OR (
+                                m.publish_year = ?
+                                AND m.publish_month = ?
+                                AND m.publish_day <= ?
+                            )
+                        )
+                        """);
+
+                parameters.add(dateTo.getYear());
+                parameters.add(dateTo.getYear());
+                parameters.add(dateTo.getMonthValue());
+                parameters.add(dateTo.getYear());
+                parameters.add(dateTo.getMonthValue());
+                parameters.add(dateTo.getDayOfMonth());
+            }
+
+            if (context.namedEntities() != null && !context.namedEntities().isEmpty()) {
+
+                String placeholders = context.namedEntities().stream()
+                        .map(entity -> "?")
+                        .collect(Collectors.joining(", "));
+
+                conditions.add("""
+                        EXISTS (
+                            SELECT 1
+                            FROM message_entities me_filter
+                            JOIN named_entities ne_filter
+                                ON ne_filter.entity_id = me_filter.entity_id
+                            WHERE me_filter.message_id = m.id
+                              AND ne_filter.entity_name IN (%s)
+                        )
+                        """.formatted(placeholders));
+
+                parameters.addAll(
+                        context.namedEntities().stream()
+                                .map(NamedEntity::getName)
+                                .toList()
+                );
+            }
+
+            if (context.topicConfidenceMap() != null && !context.topicConfidenceMap().isEmpty()) {
+
+                List<String> topicConditions = new ArrayList<>();
+
+                for (Map.Entry<String, Double> entry : context.topicConfidenceMap().entrySet()) {
+
+                    topicConditions.add("""
+                            EXISTS (
+                                SELECT 1
+                                FROM message_topics mt_filter
+                                JOIN topics t_filter
+                                    ON t_filter.topic_id = mt_filter.topic_id
+                                WHERE mt_filter.message_id = m.id
+                                  AND t_filter.topic_name = ?
+                                  AND mt_filter.confidence >= ?
+                            )
+                            """);
+
+                    parameters.add(entry.getKey());
+                    parameters.add(entry.getValue());
+                }
+                conditions.add("(" + String.join(" OR ", topicConditions) + ")");
+            }
+
+            if (conditions.isEmpty()) {
+                return new SqlFilter("", List.of());
+            }
+
+            return new SqlFilter(
+                    " WHERE " + String.join(" AND ", conditions),
+                    parameters
+            );
+        }
+
+        private Map<String, Long> getMessagesByTopic(Connection connection, SqlFilter filter) throws SQLException {
+
+            String sql = """
+                    WITH filtered_messages AS (
+                        SELECT m.*
+                        FROM messages m
+                        %s
+                    )
+                    SELECT
+                        t.topic_name,
+                        COUNT(DISTINCT mt.message_id) AS message_count
+                    FROM filtered_messages fm
+                    JOIN message_topics mt
+                        ON mt.message_id = fm.id
+                    JOIN topics t
+                        ON t.topic_id = mt.topic_id
+                    GROUP BY t.topic_name
+                    ORDER BY message_count DESC
+                    """.formatted(filter.whereClause());
+
+            Map<String, Long> result = new LinkedHashMap<>();
+
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                setParameters(statement, filter.parameters());
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    while (resultSet.next()) {
+                        result.put(
+                                resultSet.getString("topic_name"),
+                                resultSet.getLong("message_count")
+                        );
+                    }
+                }
+            }
+            return result;
+        }
+
+        private Map<String, Long> getMessagesByEntity(Connection connection, SqlFilter filter) throws SQLException {
+
+            String sql = """
+                    WITH filtered_messages AS (
+                        SELECT m.*
+                        FROM messages m
+                        %s
+                    )
+                    SELECT
+                        ne.entity_name,
+                        COUNT(DISTINCT me.message_id) AS message_count
+                    FROM filtered_messages fm
+                    JOIN message_entities me
+                        ON me.message_id = fm.id
+                    JOIN named_entities ne
+                        ON ne.entity_id = me.entity_id
+                    GROUP BY ne.entity_name
+                    ORDER BY message_count DESC
+                    """.formatted(filter.whereClause());
+
+            Map<String, Long> result = new LinkedHashMap<>();
+
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                setParameters(statement, filter.parameters());
+                try (ResultSet resultSet = statement.executeQuery()) {
+
+                    while (resultSet.next()) {
+                        result.put(
+                                resultSet.getString("entity_name"),
+                                resultSet.getLong("message_count")
+                        );
+                    }
+                }
+            }
+            return result;
+        }
+
+        private void setParameters(PreparedStatement statement, List<Object> parameters) throws SQLException {
+            for (int i = 0; i < parameters.size(); i++) {
+                statement.setObject(i + 1, parameters.get(i));
+            }
+        }
+    }
+
+    private record SqlFilter(
+            String whereClause,
+            List<Object> parameters
+    ) {
     }
 }

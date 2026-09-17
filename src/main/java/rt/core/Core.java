@@ -7,12 +7,13 @@ import rt.api.ExternalAPIHandler;
 import rt.data.DataInputService;
 import rt.data.embedder.EmbeddingClient;
 import rt.data.storage.SQLiteDB;
+import rt.model.ai.QueryContext;
 import rt.model.message.RawMessageRecord;
 import rt.model.notification.Notification;
 import rt.telegram.TgClientWrapper;
 import rt.utils.DateTimeUtils;
 import rt.view.auth.AuthUI;
-import rt.view.search.SearchWindow;
+import rt.view.main.MainWindow;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -23,11 +24,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 
-public class Core implements ParserAssistant {
+public class Core implements ParserAssistant, AgentAssistant {
 
     private TgClientWrapper tgClientWrapper;
     private final AuthUI authUI;
-    private final SearchWindow view;
+    private final MainWindow view;
     private final ExternalAPIHandler apiHandler;
     private final DataInputService dataInputService;
     private final Agent agent;
@@ -41,13 +42,13 @@ public class Core implements ParserAssistant {
         Platform.startup(() -> {
         });
         this.authUI = new AuthUI();
-        this.view = new SearchWindow();
+        this.view = new MainWindow();
         view.setCore(this);
         SQLiteDB db = new SQLiteDB();
         this.apiHandler = new ExternalAPIHandler();
         EmbeddingClient embeddingClient = new EmbeddingClient(apiHandler);
         this.dataInputService = new DataInputService(apiHandler, db, embeddingClient);
-        this.agent = new Agent(apiHandler, db, embeddingClient);
+        this.agent = new Agent(apiHandler, db, embeddingClient, this);
     }
 
     public void start() {
@@ -136,6 +137,27 @@ public class Core implements ParserAssistant {
 
     public boolean embeddingServiceIsAvailable() {
         return apiHandler.checkEmbeddingServicesHealth();
+    }
+
+    public void setQueryContext(QueryContext queryContext) {
+        agent.setQueryContext(queryContext);
+    }
+
+    public void clearChat() {
+        agent.clearChat();
+    }
+
+    public void askAgent(String question) {
+        executor.execute(() -> agent.ask(question));
+    }
+
+    @Override
+    public void sendAnswer(String answer) {
+        view.showAgentsAnswer(answer);
+    }
+
+    public boolean isThinking(){
+        return agent.isThinking();
     }
 
     private Set<Long> prepareSenderIds(Set<Long> source, Function<Integer, Collection<Long>> getFolder) {
