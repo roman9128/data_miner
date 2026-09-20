@@ -7,12 +7,12 @@ public class NotificationHandler {
 
     private volatile boolean running = false;
     private Thread notificationThread;
-    private MainController controller;
+    private Controller controller;
 
     NotificationHandler() {
     }
 
-    void setController(MainController controller) {
+    void setController(Controller controller) {
         this.controller = controller;
     }
 
@@ -28,7 +28,7 @@ public class NotificationHandler {
                     if (text == null || text.isBlank()) {
                         continue;
                     }
-                    MainController currentController = controller;
+                    Controller currentController = controller;
                     if (currentController == null) {
                         continue;
                     }

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane styleClass="search-root" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="rt.view.main.Controller">
+
+    <top>
+        <VBox styleClass="header">
+            <Label styleClass="header-title" text="Telegram Data Miner" />
+            <Label styleClass="header-subtitle" text="Сбор и анализ данных Telegram" />
+        </VBox>
+    </top>
+    <center>
+        <TabPane fx:id="mainTabPane" styleClass="main-tabs" tabClosingPolicy="UNAVAILABLE">
+
+            <Tab text="Сбор данных">
+                <BorderPane styleClass="collection-panel">
+                    <center>
+                        <VBox spacing="20" styleClass="collection-content">
+                            <VBox spacing="8">
+                                <Label styleClass="section-title" text="Источники" />
+                                <HBox alignment="CENTER_LEFT" fillHeight="true" spacing="24">
+                                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                        <Label styleClass="field-label" text="Папки" />
+                                        <ComboBox fx:id="foldersComboBox" maxWidth="Infinity" styleClass="search-combo" />
+                                    </VBox>
+                                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                        <Label styleClass="field-label" text="Каналы" />
+                                        <ComboBox fx:id="channelsComboBox" maxWidth="Infinity" styleClass="search-combo" />
+                                    </VBox>
+                                </HBox>
+                            </VBox>
+                            <VBox spacing="10">
+                                <Label styleClass="section-title" text="Период" />
+                                <HBox alignment="CENTER_LEFT" spacing="8">
+                                    <Label styleClass="field-label" text="С" />
+                                    <DatePicker fx:id="dateFrom" maxWidth="Infinity" prefWidth="135" HBox.hgrow="ALWAYS" />
+                                    <Label styleClass="field-label" text="ПО" />
+                                    <DatePicker fx:id="dateTo" maxWidth="Infinity" prefWidth="135" HBox.hgrow="ALWAYS" />
+                                </HBox>
+                                <HBox alignment="CENTER_LEFT" fillHeight="true" spacing="8">
+                                    <Button maxWidth="Infinity" onAction="#onToday" styleClass="period-button" text="Сегодня" HBox.hgrow="ALWAYS" />
+                                    <Button maxWidth="Infinity" onAction="#onYesterday" styleClass="period-button" text="Вчера" HBox.hgrow="ALWAYS" />
+                                    <Button maxWidth="Infinity" onAction="#onLast7Days" styleClass="period-button" text="7 дней" HBox.hgrow="ALWAYS" />
+                                    <Button maxWidth="Infinity" onAction="#onLast14Days" styleClass="period-button" text="14 дней" HBox.hgrow="ALWAYS" />
+                                    <Button maxWidth="Infinity" onAction="#onLast30Days" styleClass="period-button" text="30 дней" HBox.hgrow="ALWAYS" />
+                                </HBox>
+                            </VBox>
+                            <VBox spacing="8" VBox.vgrow="ALWAYS">
+                                <Label styleClass="section-title" text="Журнал" />
+                                <ListView fx:id="notificationListView" minHeight="100" prefHeight="145" styleClass="notification-list" VBox.vgrow="ALWAYS" />
+                            </VBox>
+                        </VBox>
+                    </center>
+                    <bottom>
+                        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="bottom-bar">
+                            <Label fx:id="queueSizeLabel" styleClass="queue-status-label" text="Нет сообщений в обработке" />
+                            <HBox HBox.hgrow="ALWAYS" />
+                            <Button onAction="#onExportToCSV" styleClass="secondary-button" text="Экспорт CSV" />
+                            <Button onAction="#onSearch" styleClass="primary-button" text="Собрать данные" />
+                        </HBox>
+                    </bottom>
+                </BorderPane>
+            </Tab>
+
+            <Tab text="Контекст ИИ">
+                <BorderPane styleClass="context-panel">
+                    <center>
+                        <VBox spacing="20" styleClass="context-content">
+                            <HBox alignment="CENTER_LEFT" spacing="24">
+                                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                    <Label styleClass="section-title" text="Каналы" />
+                                    <ComboBox fx:id="contextChatsComboBox" maxWidth="Infinity" styleClass="search-combo" />
+                                </VBox>
+                                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                    <Label styleClass="section-title" text="Темы" />
+                                    <ComboBox fx:id="contextTopicsComboBox" maxWidth="Infinity" styleClass="search-combo" />
+                                </VBox>
+                            </HBox>
+                            <VBox spacing="10">
+                                <Label styleClass="section-title" text="Период" />
+                                <HBox alignment="CENTER_LEFT" spacing="8">
+                                    <Label styleClass="field-label" text="С" />
+                                    <DatePicker fx:id="contextDateFrom" maxWidth="Infinity" HBox.hgrow="ALWAYS" />
+                                    <Label styleClass="field-label" text="ПО" />
+                                    <DatePicker fx:id="contextDateTo" maxWidth="Infinity" HBox.hgrow="ALWAYS" />
+                                </HBox>
+                                <HBox alignment="CENTER_LEFT" fillHeight="true" spacing="8">
+                                    <Button maxWidth="Infinity" onAction="#onContextToday" styleClass="period-button" text="Сегодня" HBox.hgrow="ALWAYS" />
+                                    <Button maxWidth="Infinity" onAction="#onContextYesterday" styleClass="period-button" text="Вчера" HBox.hgrow="ALWAYS" />
+                                    <Button maxWidth="Infinity" onAction="#onContextLast7Days" styleClass="period-button" text="7 дней" HBox.hgrow="ALWAYS" />
+                                    <Button maxWidth="Infinity" onAction="#onContextLast14Days" styleClass="period-button" text="14 дней" HBox.hgrow="ALWAYS" />
+                                    <Button maxWidth="Infinity" onAction="#onContextLast30Days" styleClass="period-button" text="30 дней" HBox.hgrow="ALWAYS" />
+                                </HBox>
+                            </VBox>
+                            <VBox spacing="10" VBox.vgrow="ALWAYS">
+                                <Label styleClass="section-title" text="Сущности" />
+                                <HBox alignment="CENTER_LEFT" spacing="8">
+                                    <ComboBox fx:id="contextCategoryComboBox" prefWidth="190" promptText="Все категории" styleClass="search-combo" />
+                                    <ComboBox fx:id="contextTagComboBox" prefWidth="190" promptText="Все теги" styleClass="search-combo" />
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    <Button onAction="#onSelectAllContextEntities" styleClass="secondary-button" text="Выбрать все" />
+                                    <Button onAction="#onClearContextEntities" styleClass="secondary-button" text="Снять все" />
+                                </HBox>
+                                <ListView fx:id="contextEntitiesListView" minHeight="100" prefHeight="180" styleClass="context-entities-list" VBox.vgrow="ALWAYS" />
+                            </VBox>
+                        </VBox>
+                    </center>
+                    <bottom>
+                        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="bottom-bar">
+                            <Label styleClass="queue-status-label" text="Настройки контекста сохраняются автоматически" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Button onAction="#onClearAIContext" styleClass="secondary-button" text="Очистить контекст" />
+                        </HBox>
+                    </bottom>
+                </BorderPane>
+
+            </Tab>
+
+            <Tab text="ИИ-агент">
+                <BorderPane styleClass="ai-panel">
+                    <top>
+                        <VBox spacing="3" styleClass="ai-header">
+                            <Label styleClass="ai-subtitle" text="Помощник для работы с собранными данными" />
+                        </VBox>
+                    </top>
+                    <center>
+                        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="ai-scroll" vbarPolicy="AS_NEEDED">
+                            <VBox fx:id="aiMessagesContainer" spacing="10" styleClass="ai-messages" />
+                        </ScrollPane>
+                    </center>
+                    <bottom>
+                        <VBox spacing="8" styleClass="ai-input-container">
+                            <TextArea fx:id="aiInput" maxWidth="Infinity" prefRowCount="3" promptText="Введите сообщение..." styleClass="ai-input" wrapText="true" />
+                            <HBox alignment="CENTER_RIGHT" spacing="8">
+                                <Button onAction="#onClearChat" styleClass="secondary-button" text="Очистить чат" />
+                                <Button fx:id="aiContextButton" onAction="#onToggleAIContext" styleClass="secondary-button" text="Контекст ИИ: не задан" />
+                                <Button onAction="#onSendAIMessage" styleClass="primary-button" text="Отправить" />
+                            </HBox>
+                        </VBox>
+                    </bottom>
+                </BorderPane>
+            </Tab>
+        </TabPane>
+    </center>
+</BorderPane>

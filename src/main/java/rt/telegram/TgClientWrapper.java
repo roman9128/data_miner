@@ -4,8 +4,8 @@ import it.tdlight.client.*;
 import it.tdlight.jni.TdApi;
 import rt.core.Notifier;
 import rt.core.ParserAssistant;
-import rt.core.config.CredentialsHandler;
-import rt.core.config.AppPropertiesHandler;
+import rt.config.Credentials;
+import rt.config.AppProperties;
 import rt.model.notification.Notification;
 import rt.model.message.RawMessageRecord;
 import rt.utils.NumberUtils;
@@ -35,7 +35,7 @@ public final class TgClientWrapper implements AutoCloseable {
         this.assistant = assistant;
         this.authErrorHandler = new AuthErrorHandler();
 
-        APIToken apiToken = new APIToken(CredentialsHandler.getApiID(), CredentialsHandler.getApiHash());
+        APIToken apiToken = new APIToken(Credentials.getApiID(), Credentials.getApiHash());
         TDLibSettings settings = TDLibSettings.create(apiToken);
         Path sessionPath = Paths.get("session");
         settings.setDatabaseDirectoryPath(sessionPath.resolve("data"));
@@ -58,7 +58,7 @@ public final class TgClientWrapper implements AutoCloseable {
                 assistant.showQrCode(link);
             }
             case TdApi.AuthorizationStateWaitPassword waitPassword -> {
-                client.send(new TdApi.CheckAuthenticationPassword(CredentialsHandler.getPassword()), authErrorHandler);
+                client.send(new TdApi.CheckAuthenticationPassword(Credentials.getPassword()), authErrorHandler);
             }
             case TdApi.AuthorizationStateReady ready -> {
                 Notifier.instance().add(Notification.Level.SHOW_USER, "Готов к работе");
@@ -149,8 +149,8 @@ public final class TgClientWrapper implements AutoCloseable {
     private void loadChatHistory(long channelID, long dateFromUnix) {
         String title = chats.get(channelID).title;
         Notifier.instance().add(Notification.Level.SHOW_USER, "Загружаю сообщения из " + title);
-        int messagesLeft = AppPropertiesHandler.getMessagesToDownload();
-        int messagesToStop = AppPropertiesHandler.getMessagesToStop();
+        int messagesLeft = AppProperties.getMessagesToDownload();
+        int messagesToStop = AppProperties.getMessagesToStop();
         long fromMessageID = 0;
         while (messagesToStop > 0) {
             try {

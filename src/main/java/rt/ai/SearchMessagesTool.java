@@ -1,17 +1,13 @@
 package rt.ai;
 
-import rt.data.embedder.EmbeddingClient;
-import rt.data.embedder.VectorUtils;
-import rt.data.storage.SQLiteDB;
+import rt.data_processing.embedder.EmbeddingClient;
+import rt.data_processing.embedder.VectorUtils;
+import rt.storage.SQLiteDB;
 import rt.model.ai.QueryContext;
 import rt.model.ai.Tool;
 import rt.model.message.InfoToShow;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.*;
 
 public class SearchMessagesTool implements Tool {
 
@@ -85,39 +81,33 @@ public class SearchMessagesTool implements Tool {
     private List<InfoToShow> findBySemantic(String query) {
         float[] queryEmb = embeddingClient.createEmbedding(query);
         if (queryEmb.length == 0) return List.of();
-
         Map<Long, float[]> messagesEmb = db.getMessageIdsAndEmbeddings(queryContext);
-        Map<Long, Double> highSimilarityMessageIds = new LinkedHashMap<>();
-        Map<Long, Double> mediumSimilarityMessageIds = new LinkedHashMap<>();
-
+        Map<Long, Double> candidatesMessageIds = new HashMap<>();
         for (Map.Entry<Long, float[]> entry : messagesEmb.entrySet()) {
             double similarity = VectorUtils.cosineSimilarity(queryEmb, entry.getValue());
-            if (similarity >= 0.75) highSimilarityMessageIds.put(entry.getKey(), similarity);
-            else if (similarity >= 0.5) mediumSimilarityMessageIds.put(entry.getKey(), similarity);
+            if (similarity >= 0.55) candidatesMessageIds.put(entry.getKey(), similarity);
         }
-
-        int minimumResults = 20;
-        if (highSimilarityMessageIds.size() >= minimumResults)
-            return db.getMessagesByIds(highSimilarityMessageIds.keySet());
-
-        return db.getMessagesByIds(
-                mergeAndSortByValueWithLimit(
-                        highSimilarityMessageIds,
-                        mediumSimilarityMessageIds,
-                        minimumResults).keySet()
-        );
+        if (candidatesMessageIds.isEmpty()) return List.of();
+        List<Long> bestSimilarityMessageIds = getBestSimilarityMessageIds(candidatesMessageIds);
+        return db.getMessagesByIds(bestSimilarityMessageIds);
     }
 
-    private <K, V extends Comparable<? super V>> LinkedHashMap<K, V> mergeAndSortByValueWithLimit(Map<K, V> map1, Map<K, V> map2, int limit) {
-        return Stream.concat(map1.entrySet().stream(), map2.entrySet().stream())
-                .sorted(Map.Entry.<K, V>comparingByValue().reversed())
-                .limit(limit)
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (a, b) -> a,
-                        LinkedHashMap::new
-                ));
+    private List<Long> getBestSimilarityMessageIds(Map<Long, Double> candidatesMessageIds) {
+        List<Map.Entry<Long, Double>> list = candidatesMessageIds.entrySet().stream()
+                .sorted(Map.Entry.<Long, Double>comparingByValue().reversed())
+                .toList();
+        List<Long> result = new ArrayList<>();
+        result.add(list.getFirst().getKey());
+        for (int i = 1; i < list.size(); i++) {
+            double previous = list.get(i - 1).getValue();
+            double current = list.get(i).getValue();
+            double max = list.getFirst().getValue();
+            if (previous - current > 0.04) break;
+            if (max - current >= 0.15) break;
+            if (result.size() >= 50) break;
+            result.add(list.get(i).getKey());
+        }
+        return result;
     }
 
     @Override

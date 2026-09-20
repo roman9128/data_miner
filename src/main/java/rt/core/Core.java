@@ -4,9 +4,10 @@ import it.tdlight.client.SimpleTelegramClientFactory;
 import javafx.application.Platform;
 import rt.ai.Agent;
 import rt.api.ExternalAPIHandler;
-import rt.data.DataInputService;
-import rt.data.embedder.EmbeddingClient;
-import rt.data.storage.SQLiteDB;
+import rt.data_processing.DataInputService;
+import rt.data_processing.embedder.EmbeddingClient;
+import rt.model.ai.DatabaseContext;
+import rt.storage.SQLiteDB;
 import rt.model.ai.QueryContext;
 import rt.model.message.RawMessageRecord;
 import rt.model.notification.Notification;
@@ -29,14 +30,15 @@ public class Core implements ParserAssistant, AgentAssistant {
     private TgClientWrapper tgClientWrapper;
     private final AuthUI authUI;
     private final MainWindow view;
+    private final SQLiteDB db;
     private final ExternalAPIHandler apiHandler;
     private final DataInputService dataInputService;
     private final Agent agent;
     private final ExecutorService executor = Executors.newFixedThreadPool(5);
     private final SimpleTelegramClientFactory clientFactory = new SimpleTelegramClientFactory();
 
-    private boolean isExporting;
-    private boolean isParsing;
+    private volatile boolean isExporting;
+    private volatile boolean isParsing;
 
     public Core() {
         Platform.startup(() -> {
@@ -44,7 +46,7 @@ public class Core implements ParserAssistant, AgentAssistant {
         this.authUI = new AuthUI();
         this.view = new MainWindow();
         view.setCore(this);
-        SQLiteDB db = new SQLiteDB();
+        this.db = new SQLiteDB();
         this.apiHandler = new ExternalAPIHandler();
         EmbeddingClient embeddingClient = new EmbeddingClient(apiHandler);
         this.dataInputService = new DataInputService(apiHandler, db, embeddingClient);
@@ -76,11 +78,11 @@ public class Core implements ParserAssistant, AgentAssistant {
     }
 
     public void parseMessages(Set<Long> source, LocalDate dateFrom, LocalDate dateTo) {
-        if (!nounExtractorIsAvailable()) {
-            Notifier.instance().add(Notification.Level.SHOW_USER, "Извлечение существительных не работает");
+        if (!aiServiceIsAvailable()) {
+            Notifier.instance().add(Notification.Level.SHOW_USER, "Вспомогательный сервис для анализа текста недоступен. Проверьте, что он запущен в Docker");
         }
 
-        if (!dataInputService.queueIsEmpty() || isExporting || isParsing) {
+        if (isBusy()) {
             Notifier.instance().add(Notification.Level.SHOW_USER, "Сейчас немного занят, подождите");
             return;
         }
@@ -104,7 +106,7 @@ public class Core implements ParserAssistant, AgentAssistant {
     }
 
     public void exportToCSV() {
-        if (!dataInputService.queueIsEmpty() || isExporting || isParsing) {
+        if (isBusy()) {
             Notifier.instance().add(Notification.Level.SHOW_USER, "Сейчас немного занят, подождите");
             return;
         }
@@ -131,12 +133,16 @@ public class Core implements ParserAssistant, AgentAssistant {
         return queueSize;
     }
 
-    public boolean nounExtractorIsAvailable() {
-        return apiHandler.checkNounExtractorsHealth();
+    public boolean aiServiceIsAvailable() {
+        return apiHandler.checkHealth();
     }
 
-    public boolean embeddingServiceIsAvailable() {
-        return apiHandler.checkEmbeddingServicesHealth();
+    public DatabaseContext getDatabaseContext() {
+        if (isBusy()) {
+            Notifier.instance().add(Notification.Level.SHOW_USER, "Сейчас немного занят, подождите");
+            return null;
+        }
+        return db.getDatabaseContext();
     }
 
     public void setQueryContext(QueryContext queryContext) {
@@ -148,6 +154,10 @@ public class Core implements ParserAssistant, AgentAssistant {
     }
 
     public void askAgent(String question) {
+        if (isBusy()) {
+            Notifier.instance().add(Notification.Level.SHOW_USER, "Сейчас немного занят, подождите");
+            return;
+        }
         executor.execute(() -> agent.ask(question));
     }
 
@@ -156,8 +166,12 @@ public class Core implements ParserAssistant, AgentAssistant {
         view.showAgentsAnswer(answer);
     }
 
-    public boolean isThinking(){
+    public boolean isThinking() {
         return agent.isThinking();
+    }
+
+    public boolean isBusy() {
+        return !dataInputService.queueIsEmpty() || isExporting || isParsing;
     }
 
     private Set<Long> prepareSenderIds(Set<Long> source, Function<Integer, Collection<Long>> getFolder) {

@@ -1,6 +1,7 @@
 package rt.api;
 
 import rt.core.Notifier;
+import rt.config.AiProperties;
 import rt.model.ai.Dialogue;
 import rt.model.ai.ToolCall;
 import rt.model.notification.Notification;
@@ -19,28 +20,13 @@ import java.util.Map;
 public class ExternalAPIHandler {
 
     private final HttpClient client = HttpClient.newHttpClient();
+    private final String HEALTH = "http://127.0.0.1:8001/health";
     private final String EMBED = "http://127.0.0.1:8001/embed";
-    private final String HEALTH_EMBED = "http://127.0.0.1:8001/health";
-    private final String LEMMAS = "http://127.0.0.1:8002/lemmas";
-    private final String NOUNS = "http://127.0.0.1:8002/analyze";
-    private final String HEALTH_NOUNS = "http://127.0.0.1:8002/health";
-    private final String AI = "http://192.168.0.33:11434/v1/chat/completions";
+    private final String LEMMAS = "http://127.0.0.1:8001/lemmas";
+    private final String NOUNS = "http://127.0.0.1:8001/nouns";
 
-    public boolean checkNounExtractorsHealth() {
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(HEALTH_NOUNS)).GET().build();
-
-        try {
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return response.statusCode() == 200;
-        } catch (IOException | InterruptedException e) {
-            Notifier.instance().add(Notification.Level.ONLY_TO_LOG, e.toString());
-            return false;
-        }
-    }
-
-    public boolean checkEmbeddingServicesHealth() {
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(HEALTH_EMBED)).GET().build();
-
+    public boolean checkHealth() {
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(HEALTH)).GET().build();
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             return response.statusCode() == 200;
@@ -52,24 +38,28 @@ public class ExternalAPIHandler {
 
     public List<Noun> getNouns(String text) throws IOException, InterruptedException {
         String json = JsonUtils.makeJson(Map.of("text", text));
+        byte[] body = json.getBytes(StandardCharsets.UTF_8);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(NOUNS))
+                .version(HttpClient.Version.HTTP_1_1)
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .POST(HttpRequest.BodyPublishers.ofByteArray(body))
                 .build();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         checkStatus(response, "Natasha");
         return JsonUtils.parseNounsResponse(response.body());
     }
 
     public List<String> getLemmas(String text) throws IOException, InterruptedException {
         String json = JsonUtils.makeJson(Map.of("text", text));
+        byte[] body = json.getBytes(StandardCharsets.UTF_8);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(LEMMAS))
+                .version(HttpClient.Version.HTTP_1_1)
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .POST(HttpRequest.BodyPublishers.ofByteArray(body))
                 .build();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         checkStatus(response, "Natasha");
         return JsonUtils.parseLemmasResponse(response.body());
     }
@@ -91,7 +81,8 @@ public class ExternalAPIHandler {
     public Dialogue chat(Dialogue dialogue) throws IOException, InterruptedException {
         String json = JsonUtils.makeJson(dialogue);
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(AI))
+                .uri(URI.create(AiProperties.getUrl()))
+                .header("Authorization", "Bearer " + AiProperties.getKey())
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();

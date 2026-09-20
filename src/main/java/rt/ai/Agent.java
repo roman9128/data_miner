@@ -2,8 +2,8 @@ package rt.ai;
 
 import rt.api.ExternalAPIHandler;
 import rt.core.AgentAssistant;
-import rt.data.embedder.EmbeddingClient;
-import rt.data.storage.SQLiteDB;
+import rt.data_processing.embedder.EmbeddingClient;
+import rt.storage.SQLiteDB;
 import rt.model.ai.*;
 
 import java.io.IOException;
@@ -16,7 +16,7 @@ public class Agent {
     private Dialogue dialogue;
     private final List<Tool> availableTools;
     private static final int MAX_ITERATIONS = 10;
-    private boolean isThinking;
+    private volatile boolean isThinking;
 
     public Agent(ExternalAPIHandler api, SQLiteDB db, EmbeddingClient embeddingClient, AgentAssistant assistant) {
         this.assistant = assistant;
@@ -80,7 +80,7 @@ public class Agent {
         dialogue.clearChat();
     }
 
-    public boolean isThinking(){
+    public boolean isThinking() {
         return isThinking;
     }
 

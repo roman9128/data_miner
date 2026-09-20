@@ -19,7 +19,7 @@ public class MainWindow {
 
     private Core core;
     private Stage stage;
-    private MainController mainController;
+    private Controller controller;
     private ScheduledExecutorService sourceUpdater;
     private ScheduledExecutorService queueUpdater;
     private NotificationHandler notificationHandler;
@@ -44,27 +44,28 @@ public class MainWindow {
     }
 
     public void showAgentsAnswer(String answer) {
-        mainController.showAgentsAnswer(answer);
+        controller.showAgentsAnswer(answer);
     }
 
     private void show() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/rt/view/new_search.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/rt/view/main.fxml"));
         Parent root = loader.load();
-        mainController = loader.getController();
+        controller = loader.getController();
         stage = new Stage();
         stage.setTitle("Telegram Data Miner");
         Scene scene = new Scene(root, 700, 800);
-        scene.getStylesheets().add(getClass().getResource("/rt/view/search.css").toExternalForm());
+        scene.getStylesheets().add(getClass().getResource("/rt/view/style.css").toExternalForm());
         stage.setScene(scene);
         stage.setMinWidth(700);
         stage.setMinHeight(800);
-        mainController.setCore(core);
+        controller.setCore(core);
+        controller.loadDatabaseContext();
         notificationHandler = new NotificationHandler();
-        notificationHandler.setController(mainController);
+        notificationHandler.setController(controller);
         notificationHandler.start();
-        updateSources(mainController);
-        startSourceUpdater(mainController);
-        startQueueUpdater(mainController);
+        updateSources(controller);
+        startSourceUpdater(controller);
+        startQueueUpdater(controller);
         stage.show();
         stage.setOnCloseRequest(event -> {
             event.consume();
@@ -82,12 +83,13 @@ public class MainWindow {
         });
     }
 
-    private void startSourceUpdater(MainController controller) {
+    private void startSourceUpdater(Controller controller) {
         sourceUpdater = Executors.newSingleThreadScheduledExecutor();
         sourceUpdater.scheduleWithFixedDelay(() -> updateSources(controller), 5, 10, TimeUnit.SECONDS);
     }
 
-    private void updateSources(MainController controller) {
+    private void updateSources(Controller controller) {
+        updateContextSources();
         Map<Integer, String> folders = core.getFoldersIDsAndNames();
         Map<Long, String> channels = core.getChannelsIDsAndNames();
         boolean foldersChanged = !folders.equals(lastFolders);
@@ -108,6 +110,11 @@ public class MainWindow {
         });
     }
 
+    private void updateContextSources() {
+        if (core.isThinking() || core.isBusy()) return;
+        Platform.runLater(() -> controller.loadDatabaseContext());
+    }
+
     private void stopSourceUpdater() {
         if (sourceUpdater == null) {
             return;
@@ -116,7 +123,7 @@ public class MainWindow {
         sourceUpdater = null;
     }
 
-    private void startQueueUpdater(MainController controller) {
+    private void startQueueUpdater(Controller controller) {
         queueUpdater = Executors.newSingleThreadScheduledExecutor();
         queueUpdater.scheduleWithFixedDelay(() -> Platform.runLater(
                 () -> controller.updateQueueSize(core.getQueueSize())), 0, 1, TimeUnit.SECONDS

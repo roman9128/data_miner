@@ -1,10 +1,6 @@
 package rt;
 
 import rt.core.Core;
-import rt.data.storage.SQLiteDB;
-import rt.model.ai.QueryContext;
-
-import java.time.LocalDate;
 
 public class Main {
 

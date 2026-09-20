@@ -1,9 +1,9 @@
 package rt.ai;
 
-import rt.data.storage.SQLiteDB;
+import rt.storage.SQLiteDB;
 import rt.model.ai.QueryContext;
 import rt.model.ai.Tool;
-import rt.model.db_stats.DatabaseStats;
+import rt.model.db_info.DatabaseStats;
 
 import java.util.Map;
 import java.util.stream.Collectors;

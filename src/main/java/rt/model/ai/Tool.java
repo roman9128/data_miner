@@ -1,7 +1,6 @@
 package rt.model.ai;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import rt.data.storage.SQLiteDB;
 import rt.utils.JsonUtils;
 
 import java.util.Map;
