@@ -5,9 +5,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.DatePicker;
 import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
 import javafx.scene.input.MouseButton;
 import rt.model.ai.DatabaseContext;
 import rt.model.ai.QueryContext;
@@ -23,9 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class Tab2Context {
-
     private static final Tab2Context INSTANCE = new Tab2Context();
-
     private Controller controller;
     private DatabaseContext databaseContext;
     private QueryContext queryContext;
@@ -63,7 +59,15 @@ public final class Tab2Context {
     }
 
     boolean hasConfiguredContext() {
-        return queryContext != null;
+        if (queryContext == null) return false;
+        if (
+                (queryContext.chatIds() == null || queryContext.chatIds().isEmpty())
+                        && (queryContext.dateFrom() == null)
+                        && (queryContext.dateTo() == null)
+                        && (queryContext.namedEntities() == null || queryContext.namedEntities().isEmpty())
+                        && (queryContext.topics() == null || queryContext.topics().isEmpty())
+        ) return false;
+        return true;
     }
 
     private void updateQueryContext() {

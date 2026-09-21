@@ -14,7 +14,7 @@ import rt.model.notification.Notification;
 import rt.telegram.TgClientWrapper;
 import rt.utils.DateTimeUtils;
 import rt.view.auth.AuthUI;
-import rt.view.main.MainWindow;
+import rt.view.main.MainView;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -29,7 +29,7 @@ public class Core implements ParserAssistant, AgentAssistant {
 
     private TgClientWrapper tgClientWrapper;
     private final AuthUI authUI;
-    private final MainWindow view;
+    private final MainView view;
     private final SQLiteDB db;
     private final ExternalAPIHandler apiHandler;
     private final DataInputService dataInputService;
@@ -44,7 +44,7 @@ public class Core implements ParserAssistant, AgentAssistant {
         Platform.startup(() -> {
         });
         this.authUI = new AuthUI();
-        this.view = new MainWindow();
+        this.view = new MainView();
         view.setCore(this);
         this.db = new SQLiteDB();
         this.apiHandler = new ExternalAPIHandler();

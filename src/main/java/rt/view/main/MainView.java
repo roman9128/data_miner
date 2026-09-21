@@ -15,8 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class MainWindow {
-
+public class MainView {
     private Core core;
     private Stage stage;
     private Controller controller;
@@ -35,10 +34,7 @@ public class MainWindow {
             try {
                 show();
             } catch (IOException e) {
-                Notifier.instance().add(
-                        Notification.Level.ONLY_TO_LOG,
-                        e.toString()
-                );
+                Notifier.instance().add(Notification.Level.ONLY_TO_LOG, e.toString());
             }
         });
     }
@@ -53,11 +49,11 @@ public class MainWindow {
         controller = loader.getController();
         stage = new Stage();
         stage.setTitle("Telegram Data Miner");
-        Scene scene = new Scene(root, 700, 800);
+        Scene scene = new Scene(root, 700, 700);
         scene.getStylesheets().add(getClass().getResource("/rt/view/style.css").toExternalForm());
         stage.setScene(scene);
         stage.setMinWidth(700);
-        stage.setMinHeight(800);
+        stage.setMinHeight(700);
         controller.setCore(core);
         controller.loadDatabaseContext();
         notificationHandler = new NotificationHandler();
