@@ -29,7 +29,7 @@ class NLPClassifier {
             double[] probabilities = categorizer.categorize(tokens);
             int labelIndex = categorizer.getIndex(label);
             double labelProbability = probabilities[labelIndex];
-            if (labelProbability > 0.5) {
+            if (labelProbability >= 0.55) {
                 result.put(label, labelProbability * 100);
             }
         }
