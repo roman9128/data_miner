@@ -1,8 +1,11 @@
 package rt.ai;
 
 import rt.api.ExternalAPIHandler;
+import rt.config.AiProperties;
 import rt.core.AgentAssistant;
+import rt.core.Notifier;
 import rt.data_processing.embedder.EmbeddingClient;
+import rt.model.notification.Notification;
 import rt.storage.SQLiteDB;
 import rt.model.ai.*;
 
@@ -26,7 +29,7 @@ public class Agent {
                 new DatabaseStatsTool(db)
         );
         this.dialogue = new Dialogue.Builder()
-                .setModel(Model.GPT_OSS)
+                .setModel(AiProperties.getModel())
                 .addSystemMessage("""
                         You answer questions based on a text database.
                         Use tools when the answer requires information from the database.
@@ -49,7 +52,9 @@ public class Agent {
             try {
                 dialogue = api.chat(dialogue);
             } catch (IOException | InterruptedException e) {
-                answer("Не удалось обработать Ваш запрос: " + e);
+                String errMsg = "Не удалось обработать Ваш запрос: " + e;
+                answer(errMsg);
+                Notifier.instance().add(Notification.Level.ONLY_TO_LOG, errMsg);
                 return;
             }
             AiChatMessage aiChatMessage = dialogue.getMessages().getLast();

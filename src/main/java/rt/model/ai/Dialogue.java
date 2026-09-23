@@ -13,7 +13,7 @@ public class Dialogue {
     private final boolean stream;
 
     private Dialogue(Builder builder) {
-        this.model = builder.model.getName();
+        this.model = builder.model;
         this.aiChatMessages = builder.aiChatMessages;
         this.tools = builder.tools;
         this.temperature = builder.temperature;
@@ -72,14 +72,14 @@ public class Dialogue {
     }
 
     public static class Builder {
-        private Model model;
+        private String model;
         private final List<AiChatMessage> aiChatMessages = new ArrayList<>();
         private final List<Tool> tools = new ArrayList<>();
         private double temperature = 0.4;
         private boolean stream = false;
 
-        public Builder setModel(Model model) {
-            this.model = Objects.requireNonNull(model);
+        public Builder setModel(String model) {
+            this.model = model;
             return this;
         }
 
