@@ -1,6 +1,7 @@
 package rt.utils;
 
 import rt.model.ai.ToolCall;
+import rt.model.ai.Usage;
 import rt.model.noun.Noun;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -48,6 +49,18 @@ public class JsonUtils {
                 .path("message")
                 .path("content");
         return content.isNull() ? null : content.asString();
+    }
+
+    public static Usage getUsage(String jsonResponse) {
+        JsonNode root = MAPPER.readTree(jsonResponse);
+        JsonNode prompt = root.path("usage").path("prompt_tokens");
+        JsonNode completion = root.path("usage").path("completion_tokens");
+        JsonNode total = root.path("usage").path("total_tokens");
+        return new Usage(
+                prompt.asInt(0),
+                completion.asInt(0),
+                total.asInt(0)
+        );
     }
 
     public static List<Noun> parseNounsResponse(String json) {

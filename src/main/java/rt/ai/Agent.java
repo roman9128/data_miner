@@ -5,8 +5,9 @@ import rt.config.AiProperties;
 import rt.core.AgentAssistant;
 import rt.core.Notifier;
 import rt.data_processing.embedder.EmbeddingClient;
+import rt.data_processing.noun_extractor.NounExtractor;
 import rt.model.notification.Notification;
-import rt.storage.SQLiteDB;
+import rt.storage.DatabaseManager;
 import rt.model.ai.*;
 
 import java.io.IOException;
@@ -16,28 +17,23 @@ public class Agent {
 
     private final AgentAssistant assistant;
     private final ExternalAPIHandler api;
-    private Dialogue dialogue;
+    private final Dialogue dialogue;
     private final List<Tool> availableTools;
     private static final int MAX_ITERATIONS = 10;
     private volatile boolean isThinking;
 
-    public Agent(ExternalAPIHandler api, SQLiteDB db, EmbeddingClient embeddingClient, AgentAssistant assistant) {
+    public Agent(ExternalAPIHandler api, DatabaseManager db, EmbeddingClient embeddingClient, NounExtractor nounExtractor, AgentAssistant assistant) {
         this.assistant = assistant;
         this.api = api;
         this.availableTools = List.of(
-                new SearchMessagesTool(db, embeddingClient),
+                new LastSearchTool(db),
+                new ExactSearchTool(db, nounExtractor),
+                new SemanticSearchTool(db, embeddingClient),
                 new DatabaseStatsTool(db)
         );
         this.dialogue = new Dialogue.Builder()
                 .setModel(AiProperties.getModel())
-                .addSystemMessage("""
-                        You answer questions based on a text database.
-                        Use tools when the answer requires information from the database.
-                        Do not invent facts that are not supported by the database or conversation.
-                        Use multiple tool calls when necessary to answer a complex question.
-                        Analyze the retrieved information and answer the user's original question.
-                        If the required information cannot be found, say so clearly.
-                        """)
+                .addSystemMessage(Constants.INITIAL_SYSTEM_MESSAGE.formatted(MAX_ITERATIONS))
                 .addTools(availableTools)
                 .build();
     }
@@ -50,7 +46,7 @@ public class Agent {
         while (iteration < MAX_ITERATIONS) {
             iteration++;
             try {
-                dialogue = api.chat(dialogue);
+                api.chat(dialogue);
             } catch (IOException | InterruptedException e) {
                 String errMsg = "Не удалось обработать Ваш запрос: " + e;
                 answer(errMsg);

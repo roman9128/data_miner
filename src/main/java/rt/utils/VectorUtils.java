@@ -1,4 +1,4 @@
-package rt.data_processing.embedder;
+package rt.utils;
 
 import java.nio.ByteBuffer;
 
@@ -17,6 +17,30 @@ public final class VectorUtils {
         }
 
         return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+    }
+
+    public static float[] computeCentroid(float[][] vectors) {
+        if (vectors == null || vectors.length == 0) {
+            throw new IllegalArgumentException("Список векторов пуст");
+        }
+
+        int dim = vectors[0].length;
+        float[] centroid = new float[dim];
+
+        for (float[] v : vectors) {
+            if (v.length != dim) {
+                throw new IllegalArgumentException("Векторы должны быть одинаковой длины");
+            }
+            for (int i = 0; i < dim; i++) {
+                centroid[i] += v[i];
+            }
+        }
+
+        float n = vectors.length;
+        for (int i = 0; i < dim; i++) {
+            centroid[i] /= n;
+        }
+        return centroid;
     }
 
     public static byte[] floatArrayToByteArray(float[] floats) {

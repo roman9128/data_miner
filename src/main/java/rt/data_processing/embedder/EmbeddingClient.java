@@ -28,4 +28,15 @@ public class EmbeddingClient {
             return new float[0];
         }
     }
+
+    public float[][] createEmbeddings(List<String> texts) {
+        if (texts == null || texts.isEmpty()) return new float[0][];
+
+        try {
+            return externalAPIHandler.getEmbeddings(texts);
+        } catch (Exception e) {
+            Notifier.instance().add(Notification.Level.ONLY_TO_LOG, "Ошибка создания embedding: " + e);
+            return new float[0][];
+        }
+    }
 }

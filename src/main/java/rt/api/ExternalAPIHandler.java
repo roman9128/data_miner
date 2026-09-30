@@ -4,6 +4,7 @@ import rt.core.Notifier;
 import rt.config.AiProperties;
 import rt.model.ai.Dialogue;
 import rt.model.ai.ToolCall;
+import rt.model.ai.Usage;
 import rt.model.notification.Notification;
 import rt.model.noun.Noun;
 import rt.utils.JsonUtils;
@@ -78,7 +79,7 @@ public class ExternalAPIHandler {
         return JsonUtils.parseEmbeddingsResponse(response.body());
     }
 
-    public Dialogue chat(Dialogue dialogue) throws IOException, InterruptedException {
+    public void chat(Dialogue dialogue) throws IOException, InterruptedException {
         String json = JsonUtils.makeJson(dialogue);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(AiProperties.getUrl()))
@@ -95,7 +96,6 @@ public class ExternalAPIHandler {
         } else {
             dialogue.addAssistantMessage(content);
         }
-        return dialogue;
     }
 
     private void checkStatus(HttpResponse<String> response, String serviceName) throws IOException {

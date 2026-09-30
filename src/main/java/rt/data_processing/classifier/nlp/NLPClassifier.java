@@ -1,4 +1,4 @@
-package rt.data_processing.nlp;
+package rt.data_processing.classifier.nlp;
 
 import opennlp.tools.doccat.DoccatModel;
 import opennlp.tools.doccat.DocumentCategorizerME;
@@ -14,11 +14,16 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
-class NLPModelFinder {
+public class NLPClassifier {
 
     private final Map<String, DocumentCategorizerME> models = new HashMap<>();
+    private final RussianLanguageTokenizer tokenizer = new RussianLanguageTokenizer();
 
-    void findModels() {
+    public NLPClassifier() {
+        this.models.putAll(getModels());
+    }
+
+    private Map<String, DocumentCategorizerME> getModels() {
 
         String modelsDirString = "ai/nlp/models";
         String modelExtension = "model";
@@ -39,9 +44,31 @@ class NLPModelFinder {
         } catch (IOException e) {
             Notifier.instance().add(Notification.Level.ONLY_TO_LOG, e.toString());
         }
+        return models;
     }
 
-    Map<String, DocumentCategorizerME> getModels() {
-        return models;
+    /**
+     * Метод оценивает вероятность соответствия текста определённой категории от 0 до 100%.
+     * Вероятность менее 55% не учитывается
+     *
+     * @param text текст для анализа
+     * @return HashMap категория-вероятность
+     */
+    public Map<String, Double> classify(String text) {
+        String[] tokens = tokenizer.tokenize(text);
+
+        Map<String, Double> result = new HashMap<>();
+
+        for (Map.Entry<String, DocumentCategorizerME> entry : models.entrySet()) {
+            String label = entry.getKey();
+            DocumentCategorizerME categorizer = entry.getValue();
+            double[] probabilities = categorizer.categorize(tokens);
+            int labelIndex = categorizer.getIndex(label);
+            double labelProbability = probabilities[labelIndex];
+            if (labelProbability >= 0.6) {
+                result.put(label, labelProbability * 100);
+            }
+        }
+        return result;
     }
 }

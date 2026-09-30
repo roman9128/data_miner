@@ -1,24 +1,19 @@
-package rt.data_processing.nlp;
+package rt.data_processing.classifier.nlp;
 
 import com.github.demidko.aot.WordformMeaning;
 import opennlp.tools.stemmer.snowball.SnowballStemmer;
+import rt.utils.TextUtils;
 
 import java.util.Arrays;
 import java.util.Set;
 
 class RussianLanguageTokenizer {
 
-    private final SnowballStemmer stemmer = new SnowballStemmer(SnowballStemmer.ALGORITHM.RUSSIAN);
-    private final Set<String> stopWords = WordsLoader.loadWordsSet("nlp/dictionaries/stop.txt");
-    private final Set<String> toRemoveStrings = WordsLoader.loadWordsSet("nlp/dictionaries/remove.txt");
+    private final Set<String> stopWords = WordsLoader.loadWordsSet("ai/nlp/dictionaries/stop.txt");
+    private final Set<String> toRemoveStrings = WordsLoader.loadWordsSet("ai/nlp/dictionaries/remove.txt");
 
     String[] tokenize(String text) {
-        text = text
-                .toLowerCase()
-                .replaceAll("ё", "е")
-                .replaceAll("—", "-")
-                .replaceAll("[^\\p{L}\\s-]", "");
-        String[] words = text.split("[\\s-]+");
+        String[] words = TextUtils.getWordsAsLettersFrom(text);
         words = Arrays.stream(words)
                 .filter(w -> w.length() > 1 && w.length() < 30)
                 .filter(w -> !toRemove(w))
@@ -31,7 +26,7 @@ class RussianLanguageTokenizer {
         for (int i = 0; i < wordsToChange.length; i++) {
             var meanings = WordformMeaning.lookupForMeanings(wordsToChange[i]);
             if (meanings.isEmpty()) {
-                wordsToChange[i] = stemmer.stem(wordsToChange[i]).toString();
+                wordsToChange[i] = TextUtils.stem(wordsToChange[i]);
             } else {
                 wordsToChange[i] = meanings.getFirst().getLemma().toString();
             }

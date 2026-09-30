@@ -6,8 +6,9 @@ import rt.ai.Agent;
 import rt.api.ExternalAPIHandler;
 import rt.data_processing.DataInputService;
 import rt.data_processing.embedder.EmbeddingClient;
+import rt.data_processing.noun_extractor.NounExtractor;
 import rt.model.ai.DatabaseContext;
-import rt.storage.SQLiteDB;
+import rt.storage.DatabaseManager;
 import rt.model.ai.QueryContext;
 import rt.model.message.RawMessageRecord;
 import rt.model.notification.Notification;
@@ -30,7 +31,7 @@ public class Core implements ParserAssistant, AgentAssistant {
     private TgClientWrapper tgClientWrapper;
     private final AuthUI authUI;
     private final MainView view;
-    private final SQLiteDB db;
+    private final DatabaseManager db;
     private final ExternalAPIHandler apiHandler;
     private final DataInputService dataInputService;
     private final Agent agent;
@@ -46,11 +47,12 @@ public class Core implements ParserAssistant, AgentAssistant {
         this.authUI = new AuthUI();
         this.view = new MainView();
         view.setCore(this);
-        this.db = new SQLiteDB();
+        this.db = new DatabaseManager();
         this.apiHandler = new ExternalAPIHandler();
         EmbeddingClient embeddingClient = new EmbeddingClient(apiHandler);
-        this.dataInputService = new DataInputService(apiHandler, db, embeddingClient);
-        this.agent = new Agent(apiHandler, db, embeddingClient, this);
+        NounExtractor nounExtractor = new NounExtractor(apiHandler);
+        this.dataInputService = new DataInputService(db, embeddingClient, nounExtractor);
+        this.agent = new Agent(apiHandler, db, embeddingClient, nounExtractor, this);
     }
 
     public void start() {

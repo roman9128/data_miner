@@ -1,4 +1,4 @@
-package rt.data_processing.nlp;
+package rt.data_processing.classifier.nlp;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

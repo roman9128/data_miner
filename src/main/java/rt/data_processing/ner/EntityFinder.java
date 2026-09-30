@@ -1,13 +1,11 @@
 package rt.data_processing.ner;
 
-import opennlp.tools.stemmer.snowball.SnowballStemmer;
 import rt.model.ne.NamedEntity;
 import rt.utils.TextUtils;
 
 import java.util.*;
 
 class EntityFinder {
-    private final SnowballStemmer stemmer = new SnowballStemmer(SnowballStemmer.ALGORITHM.RUSSIAN);
     private static final int MAX_DISTANCE = 2;
     private Map<String, Map<Set<String>, NamedEntity>> index = Map.of();
 
@@ -86,13 +84,13 @@ class EntityFinder {
     private List<String> stem(String text) {
         if (text == null || text.isBlank()) return List.of();
 
-        String[] words = TextUtils.getWordsFrom(text);
+        String[] words = TextUtils.getWordsAsLettersAndNumbersFrom(text);
         if (words.length == 0) return List.of();
 
         List<String> result = new ArrayList<>();
 
         for (String word : words) {
-            if (!word.isBlank()) result.add(stemmer.stem(word).toString());
+            if (!word.isBlank()) result.add(TextUtils.stem(word));
         }
         return result;
     }

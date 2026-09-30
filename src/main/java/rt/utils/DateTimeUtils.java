@@ -4,10 +4,28 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 public final class DateTimeUtils {
+    private final static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
 
     private DateTimeUtils() {
+    }
+
+    public static String getStringOf(LocalDateTime ldt) {
+        try {
+            return ldt.format(formatter);
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    public static LocalDateTime getLocalDateTimeOf(String dateTime) {
+        try {
+            return LocalDateTime.parse(dateTime, formatter);
+        } catch (Exception e) {
+            return LocalDateTime.now(ZoneId.systemDefault());
+        }
     }
 
     public static long getUnixDateFrom(LocalDate dateFrom) {
