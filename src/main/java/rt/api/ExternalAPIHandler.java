@@ -79,7 +79,7 @@ public class ExternalAPIHandler {
         return JsonUtils.parseEmbeddingsResponse(response.body());
     }
 
-    public void chat(Dialogue dialogue) throws IOException, InterruptedException {
+    public void chat(Dialogue dialogue, Usage usage) throws IOException, InterruptedException {
         String json = JsonUtils.makeJson(dialogue);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(AiProperties.getUrl()))
@@ -91,6 +91,7 @@ public class ExternalAPIHandler {
         checkStatus(response, "AI");
         String content = JsonUtils.getAiResponse(response.body());
         List<ToolCall> toolCalls = JsonUtils.parseToolCalls(response.body());
+        usage.add(JsonUtils.getUsage(response.body()));
         if (!toolCalls.isEmpty()) {
             dialogue.addAssistantToolCalls(content, toolCalls);
         } else {

@@ -134,6 +134,8 @@
                         <VBox spacing="8" styleClass="ai-input-container">
                             <TextArea fx:id="aiInput" maxWidth="Infinity" prefRowCount="3" promptText="Введите сообщение..." styleClass="ai-input" wrapText="true" />
                             <HBox alignment="CENTER_RIGHT" spacing="8">
+                                <Label fx:id="usageLabel" styleClass="usage" text="Расход токенов" />
+                                <HBox HBox.hgrow="ALWAYS" />
                                 <Button onAction="#onClearChat" styleClass="secondary-button" text="Очистить чат" />
                                 <Button fx:id="aiContextButton" onAction="#onToggleAIContext" styleClass="secondary-button" text="Контекст ИИ: не задан" />
                                 <Button onAction="#onSendAIMessage" styleClass="primary-button" text="Отправить" />

@@ -832,3 +832,11 @@
     -fx-background-color: #bfdbfe;
     -fx-text-fill: #1e40af;
 }
+
+.usage {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 7px;
+    -fx-padding: 8px 16px;
+    -fx-text-fill: #475569;
+    -fx-font-size: 13px;
+}

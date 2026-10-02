@@ -28,6 +28,7 @@ public final class Constants {
             Use the available calls efficiently.
             Analyze the retrieved information and answer the user's original question.
             If the required information cannot be found in the database, say so clearly.
+            Your answers must be informative and as short as it possible.
             """;
 
     static final String SEMANTIC_SEARCH_TOOL_NAME = "semantic_search";

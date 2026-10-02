@@ -14,6 +14,7 @@ import org.commonmark.ext.gfm.tables.TablesExtension;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
+import rt.model.ai.Usage;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -64,6 +65,10 @@ public final class Tab3AI {
         }
         aiMessagesContainer.getChildren().add(messageBox);
         scrollAIToBottom(aiMessagesContainer);
+    }
+
+    void updateUsage(Controller controller, Usage usage) {
+        controller.usageLabel.setText(usage.toString());
     }
 
     void showThinkingIndicator(VBox aiMessagesContainer) {

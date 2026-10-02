@@ -7,6 +7,7 @@ import javafx.scene.layout.VBox;
 import rt.core.Core;
 import rt.model.ai.DatabaseContext;
 import rt.model.ai.QueryContext;
+import rt.model.ai.Usage;
 import rt.model.ne.NamedEntity;
 
 import java.time.LocalDate;
@@ -42,6 +43,9 @@ public class Controller {
 
     @FXML
     private Button aiContextButton;
+
+    @FXML
+    Label usageLabel;
 
     @FXML
     ComboBox<String> contextChatsComboBox;
@@ -140,6 +144,10 @@ public class Controller {
             if (answer == null || answer.isBlank()) return;
             Tab3AI.instance().addAIMessage(aiMessagesContainer, answer, false);
         });
+    }
+
+    void showTokenUsage(Usage usage) {
+        Platform.runLater(() -> Tab3AI.instance().updateUsage(this, usage));
     }
 
     @FXML

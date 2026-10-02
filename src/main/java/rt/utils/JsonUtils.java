@@ -3,6 +3,7 @@ package rt.utils;
 import rt.model.ai.ToolCall;
 import rt.model.ai.Usage;
 import rt.model.noun.Noun;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
@@ -51,16 +52,29 @@ public class JsonUtils {
         return content.isNull() ? null : content.asString();
     }
 
+    public static String getQuery(String jsonQuery) {
+        if (jsonQuery == null || jsonQuery.isBlank()) return "";
+        try {
+            return MAPPER.readTree(jsonQuery).get("query").asString();
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
     public static Usage getUsage(String jsonResponse) {
-        JsonNode root = MAPPER.readTree(jsonResponse);
-        JsonNode prompt = root.path("usage").path("prompt_tokens");
-        JsonNode completion = root.path("usage").path("completion_tokens");
-        JsonNode total = root.path("usage").path("total_tokens");
-        return new Usage(
-                prompt.asInt(0),
-                completion.asInt(0),
-                total.asInt(0)
-        );
+        try {
+            JsonNode root = MAPPER.readTree(jsonResponse);
+            JsonNode prompt = root.path("usage").path("prompt_tokens");
+            JsonNode completion = root.path("usage").path("completion_tokens");
+            JsonNode total = root.path("usage").path("total_tokens");
+            return new Usage(
+                    prompt.asInt(0),
+                    completion.asInt(0),
+                    total.asInt(0)
+            );
+        } catch (Exception e) {
+            return new Usage(0, 0, 0);
+        }
     }
 
     public static List<Noun> parseNounsResponse(String json) {

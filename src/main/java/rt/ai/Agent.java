@@ -9,6 +9,7 @@ import rt.data_processing.noun_extractor.NounExtractor;
 import rt.model.notification.Notification;
 import rt.storage.DatabaseManager;
 import rt.model.ai.*;
+import rt.utils.JsonUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -18,6 +19,7 @@ public class Agent {
     private final AgentAssistant assistant;
     private final ExternalAPIHandler api;
     private final Dialogue dialogue;
+    private final Usage usage = new Usage(0, 0, 0);
     private final List<Tool> availableTools;
     private static final int MAX_ITERATIONS = 10;
     private volatile boolean isThinking;
@@ -46,7 +48,7 @@ public class Agent {
         while (iteration < MAX_ITERATIONS) {
             iteration++;
             try {
-                api.chat(dialogue);
+                api.chat(dialogue, usage);
             } catch (IOException | InterruptedException e) {
                 String errMsg = "Не удалось обработать Ваш запрос: " + e;
                 answer(errMsg);
@@ -64,7 +66,7 @@ public class Agent {
                     dialogue.addToolMessage(call.id(), "Tool '%s' is unavailable. Do not call it again.".formatted(call.name()));
                     continue;
                 }
-                String result = tool.execute(call.arguments());
+                String result = tool.execute(JsonUtils.getQuery(call.arguments()));
                 dialogue.addToolMessage(call.id(), result);
             }
         }
@@ -75,6 +77,7 @@ public class Agent {
     private void answer(String answer) {
         isThinking = false;
         assistant.sendAnswer(answer);
+        assistant.sendUsage(usage);
     }
 
     public void clearChat() {

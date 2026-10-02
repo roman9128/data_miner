@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import rt.core.Core;
 import rt.core.Notifier;
+import rt.model.ai.Usage;
 import rt.model.notification.Notification;
 
 import java.io.IOException;
@@ -41,6 +42,10 @@ public class MainView {
 
     public void showAgentsAnswer(String answer) {
         controller.showAgentsAnswer(answer);
+    }
+
+    public void showTokenUsage(Usage usage){
+        controller.showTokenUsage(usage);
     }
 
     private void show() throws IOException {

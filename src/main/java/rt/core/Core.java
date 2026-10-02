@@ -8,6 +8,7 @@ import rt.data_processing.DataInputService;
 import rt.data_processing.embedder.EmbeddingClient;
 import rt.data_processing.noun_extractor.NounExtractor;
 import rt.model.ai.DatabaseContext;
+import rt.model.ai.Usage;
 import rt.storage.DatabaseManager;
 import rt.model.ai.QueryContext;
 import rt.model.message.RawMessageRecord;
@@ -166,6 +167,11 @@ public class Core implements ParserAssistant, AgentAssistant {
     @Override
     public void sendAnswer(String answer) {
         view.showAgentsAnswer(answer);
+    }
+
+    @Override
+    public void sendUsage(Usage usage) {
+        view.showTokenUsage(usage);
     }
 
     public boolean isThinking() {

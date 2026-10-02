@@ -1,16 +1,25 @@
 package rt.model.ai;
 
-public record Usage(
-        int promptTokens,
-        int completionTokens,
-        int totalTokens
-) {
+public class Usage {
+
+    int promptTokens;
+    int completionTokens;
+    int totalTokens;
+
+    public Usage(int promptTokens, int completionTokens, int totalTokens) {
+        this.promptTokens = promptTokens;
+        this.completionTokens = completionTokens;
+        this.totalTokens = totalTokens;
+    }
+
+    public void add(Usage usage) {
+        this.promptTokens += usage.promptTokens;
+        this.completionTokens += usage.completionTokens;
+        this.totalTokens += usage.totalTokens;
+    }
+
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("prompt: ").append(promptTokens);
-        sb.append(", completion: ").append(completionTokens);
-        sb.append(", total: ").append(totalTokens);
-        return sb.toString();
+        return "↑%d  ↓%d  ↑↓%d".formatted(this.promptTokens, this.completionTokens, this.totalTokens);
     }
 }
