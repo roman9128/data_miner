@@ -1,8 +1,7 @@
 package rt.data_processing.classifier.nlp;
 
 import com.github.demidko.aot.WordformMeaning;
-import opennlp.tools.stemmer.snowball.SnowballStemmer;
-import rt.utils.TextUtils;
+import rt.common_utils.TextUtils;
 
 import java.util.Arrays;
 import java.util.Set;

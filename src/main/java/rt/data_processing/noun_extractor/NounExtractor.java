@@ -1,10 +1,10 @@
 package rt.data_processing.noun_extractor;
 
 import rt.api.ExternalAPIHandler;
-import rt.core.Notifier;
+import rt.notifier.Notifier;
 import rt.model.notification.Notification;
 import rt.model.noun.Noun;
-import rt.utils.TextUtils;
+import rt.common_utils.TextUtils;
 
 import java.util.List;
 

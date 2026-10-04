@@ -1,7 +1,9 @@
 package rt.data_processing.classifier.vector;
 
+import rt.notifier.Notifier;
 import rt.data_processing.embedder.EmbeddingClient;
-import rt.utils.VectorUtils;
+import rt.common_utils.VectorUtils;
+import rt.model.notification.Notification;
 
 import java.util.*;
 
@@ -9,6 +11,9 @@ public class VectorClassifier {
     private final EmbeddingClient embeddingClient;
     private final List<Topic> topics = new ArrayList<>();
     private boolean isInitialized = false;
+
+    private static final double MIN_SIMILARITY = 0.55;
+    private static final double GOOD_SIMILARITY = 0.7;
 
     public VectorClassifier(EmbeddingClient embeddingClient) {
         this.embeddingClient = embeddingClient;
@@ -20,49 +25,25 @@ public class VectorClassifier {
 
         Map<String, Double> result = new HashMap<>();
         for (Topic topic : topics) {
-            double similarity = findSimilarity2(textEmb, topic.centroid(), topic.referenceEmbeddings());
+            double similarity = findSimilarity(textEmb, topic.centroid(), topic.referenceEmbeddings());
             if (similarity >= 0.6) result.put(topic.label(), similarity * 100);
         }
         return result;
     }
 
     private double findSimilarity(float[] textEmb, float[] centroid, float[][] referenceEmbeddings) {
-        List<Double> similarities = new ArrayList<>();
+        if (referenceEmbeddings.length == 0) return 0.0;
+        if (VectorUtils.cosineSimilarity(textEmb, centroid) < 0.6) return 0.0;
 
-        double centroidSimilarity = VectorUtils.cosineSimilarity(textEmb, centroid);
-        if (centroidSimilarity < 0.55) return 0.0;
-
-        for (float[] reference : referenceEmbeddings) {
-            double similarity = VectorUtils.cosineSimilarity(textEmb, reference);
-            similarities.add(similarity);
-        }
-        int referenceMatchCount = 0;
-        for (Double similarity : similarities) {
-            if (similarity > 0.68) referenceMatchCount++;
-        }
-        double referenceMatchShare = (double) referenceMatchCount / similarities.size();
-        double shareLimit = Math.clamp(referenceMatchShare, 0.3, 0.7);
-
-        return referenceMatchShare * (1 - shareLimit) + centroidSimilarity * shareLimit;
-    }
-
-    private double findSimilarity2(float[] textEmb, float[] centroid, float[][] referenceEmbeddings) {
-        List<Double> similarities = new ArrayList<>();
-
-        double centroidSimilarity = VectorUtils.cosineSimilarity(textEmb, centroid);
-        if (centroidSimilarity < 0.6) return 0.0;
+        double sum = 0.0;
 
         for (float[] reference : referenceEmbeddings) {
             double similarity = VectorUtils.cosineSimilarity(textEmb, reference);
-            similarities.add(similarity);
+            double score = Math.clamp((similarity - MIN_SIMILARITY) / (GOOD_SIMILARITY - MIN_SIMILARITY), 0.0, 1.0);
+            sum += score * score;
         }
 
-        return similarities.stream()
-                .mapToDouble(d -> {
-                    if (d < 0.55) return 0;
-                    else if (d > 0.7) return 1;
-                    else return d * 0.75;
-                }).average().orElse(0);
+        return sum / referenceEmbeddings.length;
     }
 
     private void initializeTopics() {
@@ -73,9 +54,16 @@ public class VectorClassifier {
         );
 
         for (Map.Entry<String, List<String>> entry : topicReferencesMap.entrySet()) {
-            float[][] referenceEmbeddings = embeddingClient.createEmbeddings(entry.getValue());
-            float[] topicCentroid = VectorUtils.computeCentroid(referenceEmbeddings);
-            topics.add(new Topic(entry.getKey(), topicCentroid, referenceEmbeddings));
+            try {
+                float[][] referenceEmbeddings = embeddingClient.createEmbeddings(entry.getValue());
+                float[] topicCentroid = VectorUtils.computeCentroid(referenceEmbeddings);
+                topics.add(new Topic(entry.getKey(), topicCentroid, referenceEmbeddings));
+            } catch (Exception e) {
+                Notifier.instance().add(
+                        Notification.Level.SHOW_USER,
+                        "Ошибка для темы %s: ".formatted(entry.getKey()) + e.getMessage()
+                );
+            }
         }
         isInitialized = true;
     }

@@ -1,6 +1,6 @@
 package rt.data_processing.stats;
 
-import rt.model.message.TextStatistics;
+import rt.model.document.TextStatistics;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

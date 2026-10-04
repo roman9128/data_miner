@@ -1,9 +1,8 @@
-package rt.utils;
+package rt.common_utils;
 
 import rt.model.ai.ToolCall;
 import rt.model.ai.Usage;
 import rt.model.noun.Noun;
-import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 

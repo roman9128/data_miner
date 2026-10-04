@@ -1,33 +1,38 @@
 package rt.storage;
 
-import rt.core.Notifier;
+import rt.notifier.Notifier;
 import rt.model.ai.DatabaseContext;
 import rt.model.ai.QueryContext;
 import rt.model.db_info.DatabaseStats;
-import rt.model.message.InfoToShow;
-import rt.model.message.MessageRecord;
+import rt.model.document.InfoToShow;
+import rt.model.document.DocumentRecord;
 import rt.model.notification.Notification;
 import rt.model.noun.Noun;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.sql.*;
 import java.util.*;
 
 public class DatabaseManager {
 
-    private final SQLiteConnector connector;
+    final static String DB_URL = "jdbc:sqlite:./db/records.db";
+    private QueryContext queryContext;
+    private final SQLiteDatabaseInfo databaseInfo;
+    private final SQLiteDataInput dataInput;
+    private final SQLiteDataOutput dataOutput;
+    private final SQLiteCSVExport csvExport;
 
     public DatabaseManager() {
-        this.connector = new SQLiteConnector();
-        checkDbFolder();
-        connector.createTables();
+        this.databaseInfo = new SQLiteDatabaseInfo();
+        this.dataInput = new SQLiteDataInput();
+        this.dataOutput = new SQLiteDataOutput();
+        this.csvExport = new SQLiteCSVExport();
+        DatabaseUtils.checkDbFolder();
+        databaseInfo.createTables();
     }
 
-    public void createRecord(MessageRecord messageRecord) {
+    public void createRecord(DocumentRecord documentRecord) {
         try {
-            connector.addRecord(messageRecord);
+            dataInput.addRecord(documentRecord);
         } catch (SQLException e) {
             Notifier.instance().add(Notification.Level.SHOW_USER, e.getMessage());
         }
@@ -35,15 +40,15 @@ public class DatabaseManager {
 
     public void exportToCsv() {
         try {
-            connector.exportToCsv();
+            csvExport.exportToCsv();
         } catch (Exception e) {
             Notifier.instance().add(Notification.Level.SHOW_USER, e.getMessage());
         }
     }
 
-    public Map<Long, float[]> getMessageIdsAndEmbeddings(QueryContext queryContext) {
+    public Map<Long, float[]> getMessageIdsAndEmbeddings() {
         try {
-            return connector.getMessageIdsAndEmbeddingsAsMap(queryContext);
+            return dataOutput.getMessageIdsAndEmbeddingsAsMap(queryContext);
         } catch (SQLException e) {
             Notifier.instance().add(Notification.Level.SHOW_USER, e.getMessage());
             return Map.of();
@@ -52,46 +57,57 @@ public class DatabaseManager {
 
     public List<InfoToShow> getMessagesByIds(Collection<Long> ids) {
         try {
-            return connector.getMessagesByIds(List.copyOf(ids));
+            return dataOutput.getMessagesByIds(List.copyOf(ids));
         } catch (SQLException e) {
             Notifier.instance().add(Notification.Level.SHOW_USER, e.getMessage());
             return List.of();
         }
     }
 
-    public List<InfoToShow> searchMessagesExact(String query, QueryContext queryContext, int limit) {
+    public List<InfoToShow> searchMessagesExact(String query, int limit) {
         if (query == null || query.isBlank() || limit <= 0) return List.of();
 
         try {
-            return connector.searchMessagesExact(query, queryContext, limit);
+            return dataOutput.searchMessagesExact(query, queryContext, limit);
         } catch (SQLException e) {
             Notifier.instance().add(Notification.Level.SHOW_USER, e.getMessage());
             return List.of();
         }
     }
 
-    public List<InfoToShow> searchMessagesByNouns(List<Noun> nouns, QueryContext queryContext, int limit) {
+    public List<InfoToShow> searchMessagesByNouns(List<Noun> nouns, int limit) {
         if (nouns == null || nouns.isEmpty() || limit <= 0) return List.of();
 
         try {
-            return connector.searchMessagesByNouns(nouns, queryContext, limit);
+            return dataOutput.searchMessagesByNouns(nouns, queryContext, limit);
         } catch (SQLException e) {
             Notifier.instance().add(Notification.Level.SHOW_USER, e.getMessage());
             return List.of();
         }
     }
 
-    public List<InfoToShow> searchMessagesByEntities(String query, QueryContext queryContext, int limit) {
+    public List<InfoToShow> searchMessagesByTopic(String query, int limit) {
         if (query == null || query.isBlank() || limit <= 0) return List.of();
 
         try {
-            List<Long> entityIds = connector.findEntityIds(query);
+            return dataOutput.searchMessagesByTopic(query, queryContext, limit);
+        } catch (SQLException e) {
+            Notifier.instance().add(Notification.Level.SHOW_USER, e.getMessage());
+            return List.of();
+        }
+    }
+
+    public List<InfoToShow> searchMessagesByEntities(String query, int limit) {
+        if (query == null || query.isBlank() || limit <= 0) return List.of();
+
+        try {
+            List<Long> entityIds = dataOutput.findEntityIds(query);
             if (entityIds.isEmpty()) return List.of();
 
-            List<Long> messageIds = connector.findMessageIdsByEntityIds(entityIds, queryContext, limit);
+            List<Long> messageIds = dataOutput.findMessageIdsByEntityIds(entityIds, queryContext, limit);
             if (messageIds.isEmpty()) return List.of();
 
-            return connector.getMessagesByIds(messageIds);
+            return dataOutput.getMessagesByIds(messageIds);
 
         } catch (SQLException e) {
             Notifier.instance().add(Notification.Level.SHOW_USER, e.getMessage());
@@ -99,18 +115,18 @@ public class DatabaseManager {
         }
     }
 
-    public List<InfoToShow> getLastMessages(QueryContext queryContext, int limit) {
+    public List<InfoToShow> getLastMessages(int limit) {
         try {
-            return connector.getLastMessages(queryContext, limit);
+            return dataOutput.getLastMessages(queryContext, limit);
         } catch (SQLException e) {
             Notifier.instance().add(Notification.Level.SHOW_USER, e.getMessage());
             return List.of();
         }
     }
 
-    public DatabaseStats getDatabaseStats(QueryContext queryContext) {
+    public DatabaseStats getDatabaseStats() {
         try {
-            return connector.getDatabaseStats(queryContext);
+            return databaseInfo.getDatabaseStats(queryContext);
         } catch (SQLException e) {
             Notifier.instance().add(Notification.Level.SHOW_USER, e.getMessage());
             return new DatabaseStats(
@@ -129,22 +145,14 @@ public class DatabaseManager {
 
     public DatabaseContext getDatabaseContext() {
         try {
-            return connector.getDatabaseContext();
+            return databaseInfo.getDatabaseContext();
         } catch (SQLException e) {
             Notifier.instance().add(Notification.Level.ONLY_TO_LOG, e.getMessage());
             return new DatabaseContext(null, null, null);
         }
     }
 
-    private void checkDbFolder() {
-        final Path dbFolder = Path.of("db");
-
-        if (!Files.exists(dbFolder)) {
-            try {
-                Files.createDirectories(dbFolder);
-            } catch (IOException e) {
-                System.err.println("Ошибка при создании папки для базы данных: " + e);
-            }
-        }
+    public void setQueryContext(QueryContext queryContext) {
+        this.queryContext = queryContext;
     }
 }

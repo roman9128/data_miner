@@ -2,13 +2,14 @@ package rt.telegram;
 
 import it.tdlight.client.*;
 import it.tdlight.jni.TdApi;
-import rt.core.Notifier;
-import rt.core.ParserAssistant;
+import rt.model.document.ContentSource;
+import rt.notifier.Notifier;
+import rt.core.AssistantParser;
 import rt.config.Credentials;
 import rt.config.AppProperties;
 import rt.model.notification.Notification;
-import rt.model.message.RawMessageRecord;
-import rt.utils.NumberUtils;
+import rt.model.document.RawMessage;
+import rt.common_utils.NumberUtils;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,10 +28,10 @@ public final class TgClientWrapper implements AutoCloseable {
     private final ConcurrentMap<Integer, String> foldersInfo = new ConcurrentHashMap<>();
     private final ConcurrentMap<Integer, long[]> chatsInFolders = new ConcurrentHashMap<>();
     private final ConcurrentMap<Long, TdApi.Supergroup> supergroups = new ConcurrentHashMap<>();
-    private final ParserAssistant assistant;
+    private final AssistantParser assistant;
     private final AuthErrorHandler authErrorHandler;
 
-    public TgClientWrapper(SimpleTelegramClientFactory clientFactory, ParserAssistant assistant) {
+    public TgClientWrapper(SimpleTelegramClientFactory clientFactory, AssistantParser assistant) {
 
         this.assistant = assistant;
         this.authErrorHandler = new AuthErrorHandler();
@@ -39,7 +40,7 @@ public final class TgClientWrapper implements AutoCloseable {
         TDLibSettings settings = TDLibSettings.create(apiToken);
         Path sessionPath = Paths.get("session");
         settings.setDatabaseDirectoryPath(sessionPath.resolve("data"));
-        settings.setApplicationVersion("1.0.0");
+        settings.setApplicationVersion("latest");
         SimpleTelegramClientBuilder clientBuilder = clientFactory.builder(settings);
         SimpleTelegramClient client = clientBuilder.build(AuthenticationSupplier.qrCode());
         client.addUpdateHandler(TdApi.UpdateAuthorizationState.class, this::onUpdateAuthorizationState);
@@ -61,8 +62,8 @@ public final class TgClientWrapper implements AutoCloseable {
                 client.send(new TdApi.CheckAuthenticationPassword(Credentials.getPassword()), authErrorHandler);
             }
             case TdApi.AuthorizationStateReady ready -> {
-                Notifier.instance().add(Notification.Level.SHOW_USER, "Готов к работе");
-                assistant.startInteractions();
+                Notifier.instance().add(Notification.Level.SHOW_USER, "Telegram готов к работе");
+                assistant.closeAuthWindow();
             }
             case TdApi.AuthorizationStateLoggingOut loggingOut -> {
                 Notifier.instance().add(Notification.Level.SHOW_USER, "Разлогинен");
@@ -213,7 +214,7 @@ public final class TgClientWrapper implements AutoCloseable {
             TdApi.Message message = chatHistoryLoader.takeMessage();
             String senderName = chats.get(message.chatId).title;
             String link = getMsgLink(message);
-            assistant.addRawMessageRecord(new RawMessageRecord(message, senderName, link));
+            assistant.addRawMessageRecord(new RawMessage(message, ContentSource.TELEGRAM, senderName, link));
         }
     }
 

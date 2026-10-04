@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 public class DatabaseStatsTool implements Tool {
 
     private final DatabaseManager db;
-    private QueryContext queryContext;
 
     public DatabaseStatsTool(DatabaseManager db) {
         this.db = db;
@@ -34,7 +33,7 @@ public class DatabaseStatsTool implements Tool {
 
     @Override
     public String execute(String arguments) {
-        DatabaseStats stats = db.getDatabaseStats(queryContext);
+        DatabaseStats stats = db.getDatabaseStats();
         return Constants.DATABASE_STATS_TOOL_RESULT.formatted(
                 stats.messageCount(),
                 stats.chatCount(),
@@ -55,10 +54,5 @@ public class DatabaseStatsTool implements Tool {
                 .limit(Constants.DISTRIBUTION_LIMIT)
                 .map(entry -> entry.getKey() + ": " + entry.getValue())
                 .collect(Collectors.joining(System.lineSeparator()));
-    }
-
-    @Override
-    public void setQueryContext(QueryContext queryContext) {
-        this.queryContext = queryContext;
     }
 }

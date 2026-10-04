@@ -7,9 +7,9 @@ public final class References {
     private References() {
     }
 
-    public static final String AI_LABEL = "Искусственный интеллект";
-    public static final String IT_LABEL = "Информационные технологии";
-    public static final String SPORT_LABEL = "Спорт";
+    public static final String AI_LABEL = "ИИ";
+    public static final String IT_LABEL = "ИТ";
+    public static final String SPORT_LABEL = "спорт";
 
     public static final List<String> AI_TEXTS = List.of(
             "Модель машинного обучения классифицирует данные.",

@@ -1,4 +1,4 @@
-package rt.model.message;
+package rt.model.document;
 
 import rt.model.ne.NamedEntity;
 import rt.model.noun.Noun;
@@ -7,15 +7,14 @@ import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-public record MessageRecord(
+public record DocumentRecord(
 
-        long messageId,
-        long chatId,
-        String chatName,
+        String sourceDocumentId,
+        String sourceId,
+        String sourceName,
         String link,
         LocalDateTime parsedAt,
         LocalDateTime publishedAt,
@@ -26,34 +25,31 @@ public record MessageRecord(
         int publishHour,
         int publishMinute,
         int publishSecond,
+        String contentType,
+        String contentSource,
 
-        MessageContentType contentType,
         String text,
         int textLength,
         int wordCount,
         double averageWordLength,
         int emojiCount,
-
-        long replyToChatId,
-        long replyToMessageId,
-        long forwardOriginChatId,
-        long forwardOriginMessageId,
-
         List<Noun> nouns,
         Set<NamedEntity> namedEntities,
-        Map<String, Double> topicConfidenceMap,
+        Set<String> topics,
         float[] embedding
 ) {
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof MessageRecord other)) return false;
-        return messageId == other.messageId && chatId == other.chatId;
+        if (!(o instanceof DocumentRecord other)) return false;
+        return Objects.equals(contentSource, other.contentSource)
+                && Objects.equals(sourceDocumentId, other.sourceDocumentId)
+                && Objects.equals(sourceId, other.sourceId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(messageId, chatId);
+        return Objects.hash(contentSource, sourceDocumentId, sourceId);
     }
 }

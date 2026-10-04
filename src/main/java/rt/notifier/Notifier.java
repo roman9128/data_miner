@@ -1,9 +1,10 @@
-package rt.core;
+package rt.notifier;
 
 import rt.model.notification.Notification;
 
 import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
@@ -21,7 +22,7 @@ public class Notifier {
             logger.addHandler(fileHandler);
             logger.setUseParentHandlers(false);
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println(e);
         }
     }
 
@@ -47,8 +48,8 @@ public class Notifier {
         queue.offer(new Notification(level, text));
     }
 
-    public Notification take() throws InterruptedException {
-        return queue.take();
+    public Notification poll() throws InterruptedException {
+        return queue.poll(200, TimeUnit.MILLISECONDS);
     }
 
     public static void shutdownLogger() {

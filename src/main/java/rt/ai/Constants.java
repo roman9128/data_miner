@@ -14,9 +14,11 @@ public final class Constants {
             Do not invent facts that are not supported by the database or conversation.
             Choose the database tool according to the user's request:
             - semantic_search:
-              Use for meaning, context, facts, events, topics, or other information that should be found by semantic similarity.
+              Use for meaning, context, facts, events, or other information that should be found by semantic similarity.
             - exact_search:
               Use when the user asks to find a specific literal word, name, phrase, term, code, or other exact text occurrence.
+            - topic_search:
+              Use when the user wants to find messages of a specific topic from a provided list of available topics.
             - last_messages_search:
               Use when the user asks for the latest messages in the database.
             - get_database_stats:
@@ -24,6 +26,7 @@ public final class Constants {
             If a request requires several kinds of information, use multiple tools when necessary.
             Never use search tools to retrieve the entire database.
             If the requested analysis requires more data than can reasonably be retrieved, ask the user to narrow the request by topic, time period, chat, or another relevant criterion.
+            If the user looks for the messages of a topic which is not included to the database, tell the user that request cannot be done because the database has no messages of that topic.
             You have only %d tool calls available for one user's request.
             Use the available calls efficiently.
             Analyze the retrieved information and answer the user's original question.
@@ -67,6 +70,25 @@ public final class Constants {
                     "query": {
                       "type": "string",
                       "description": "The exact word, name, phrase, term, code, or other literal text to find."
+                    }
+                  },
+                  "required": ["query"]
+                }
+            """;
+    static final String TOPIC_SEARCH_TOOL_NAME = "topic_search";
+    static final String TOPIC_SEARCH_TOOL_DESC = """
+            Search messages by topic label.
+            The search requires one topic from the following list: %s.
+            Use only provided exact topic labels.
+            The tool returns up to %d matching messages with their link, chat name, text, and date of publishing.
+            """;
+    static final String TOPIC_SEARCH_TOOL_PARAMS = """
+             {
+                  "type": "object",
+                  "properties": {
+                    "query": {
+                      "type": "string",
+                      "description": "The exact label of a topic to find."
                     }
                   },
                   "required": ["query"]

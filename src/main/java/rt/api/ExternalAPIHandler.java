@@ -1,13 +1,13 @@
 package rt.api;
 
-import rt.core.Notifier;
+import rt.notifier.Notifier;
 import rt.config.AiProperties;
 import rt.model.ai.Dialogue;
 import rt.model.ai.ToolCall;
 import rt.model.ai.Usage;
 import rt.model.notification.Notification;
 import rt.model.noun.Noun;
-import rt.utils.JsonUtils;
+import rt.common_utils.JsonUtils;
 
 import java.io.IOException;
 import java.net.URI;
@@ -23,7 +23,6 @@ public class ExternalAPIHandler {
     private final HttpClient client = HttpClient.newHttpClient();
     private final String HEALTH = "http://127.0.0.1:8001/health";
     private final String EMBED = "http://127.0.0.1:8001/embed";
-    private final String LEMMAS = "http://127.0.0.1:8001/lemmas";
     private final String NOUNS = "http://127.0.0.1:8001/nouns";
 
     public boolean checkHealth() {
@@ -49,20 +48,6 @@ public class ExternalAPIHandler {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         checkStatus(response, "Natasha");
         return JsonUtils.parseNounsResponse(response.body());
-    }
-
-    public List<String> getLemmas(String text) throws IOException, InterruptedException {
-        String json = JsonUtils.makeJson(Map.of("text", text));
-        byte[] body = json.getBytes(StandardCharsets.UTF_8);
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(LEMMAS))
-                .version(HttpClient.Version.HTTP_1_1)
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofByteArray(body))
-                .build();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        checkStatus(response, "Natasha");
-        return JsonUtils.parseLemmasResponse(response.body());
     }
 
     public float[][] getEmbeddings(List<String> texts) throws IOException, InterruptedException {

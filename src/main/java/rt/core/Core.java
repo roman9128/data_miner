@@ -1,20 +1,20 @@
 package rt.core;
 
 import it.tdlight.client.SimpleTelegramClientFactory;
-import javafx.application.Platform;
 import rt.ai.Agent;
 import rt.api.ExternalAPIHandler;
-import rt.data_processing.DataInputService;
+import rt.common_utils.DateTimeUtils;
+import rt.data_processing.DataProcessor;
 import rt.data_processing.embedder.EmbeddingClient;
 import rt.data_processing.noun_extractor.NounExtractor;
 import rt.model.ai.DatabaseContext;
-import rt.model.ai.Usage;
-import rt.storage.DatabaseManager;
 import rt.model.ai.QueryContext;
-import rt.model.message.RawMessageRecord;
+import rt.model.ai.Usage;
+import rt.model.document.RawMessage;
 import rt.model.notification.Notification;
+import rt.notifier.Notifier;
+import rt.storage.DatabaseManager;
 import rt.telegram.TgClientWrapper;
-import rt.utils.DateTimeUtils;
 import rt.view.auth.AuthUI;
 import rt.view.main.MainView;
 
@@ -27,14 +27,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 
-public class Core implements ParserAssistant, AgentAssistant {
+public class Core implements AssistantParser, AssistantAgent {
 
     private TgClientWrapper tgClientWrapper;
     private final AuthUI authUI;
     private final MainView view;
     private final DatabaseManager db;
     private final ExternalAPIHandler apiHandler;
-    private final DataInputService dataInputService;
+    private final DataProcessor dataProcessor;
     private final Agent agent;
     private final ExecutorService executor = Executors.newFixedThreadPool(5);
     private final SimpleTelegramClientFactory clientFactory = new SimpleTelegramClientFactory();
@@ -43,8 +43,7 @@ public class Core implements ParserAssistant, AgentAssistant {
     private volatile boolean isParsing;
 
     public Core() {
-        Platform.startup(() -> {
-        });
+
         this.authUI = new AuthUI();
         this.view = new MainView();
         view.setCore(this);
@@ -52,12 +51,14 @@ public class Core implements ParserAssistant, AgentAssistant {
         this.apiHandler = new ExternalAPIHandler();
         EmbeddingClient embeddingClient = new EmbeddingClient(apiHandler);
         NounExtractor nounExtractor = new NounExtractor(apiHandler);
-        this.dataInputService = new DataInputService(db, embeddingClient, nounExtractor);
+        this.dataProcessor = new DataProcessor(db, embeddingClient, nounExtractor);
         this.agent = new Agent(apiHandler, db, embeddingClient, nounExtractor, this);
     }
 
-    public void start() {
-        executor.execute(this::startParser);
+    public void init() {
+        executor.execute(view::start);
+        executor.execute(this::start);
+        executor.execute(dataProcessor::start);
     }
 
     @Override
@@ -66,18 +67,13 @@ public class Core implements ParserAssistant, AgentAssistant {
     }
 
     @Override
-    public void startInteractions() {
+    public void closeAuthWindow() {
         authUI.closeAuthWindow();
-        executor.execute(view::startInteractions);
     }
 
     @Override
-    public void addRawMessageRecord(RawMessageRecord rawMessageRecord) {
-        dataInputService.addRawMessageRecord(rawMessageRecord);
-    }
-
-    public void close() {
-        tgClientWrapper.close();
+    public void addRawMessageRecord(RawMessage rawMessage) {
+        dataProcessor.addRawMessageRecord(rawMessage);
     }
 
     public void parseMessages(Set<Long> source, LocalDate dateFrom, LocalDate dateTo) {
@@ -99,7 +95,6 @@ public class Core implements ParserAssistant, AgentAssistant {
         Set<Long> senderIds = prepareSenderIds(source, tgClientWrapper::getChatsInFolder);
         long unixDateFrom = DateTimeUtils.getUnixDateFrom(dateFrom);
         long unixDateTo = DateTimeUtils.getUnixDateTo(dateTo);
-        executor.execute(dataInputService::work);
 
         executor.submit(() -> {
             senderIds.forEach(channelId -> tgClientWrapper.loadChannelsHistory(channelId, unixDateFrom, unixDateTo));
@@ -115,28 +110,30 @@ public class Core implements ParserAssistant, AgentAssistant {
         }
         Notifier.instance().add(Notification.Level.SHOW_USER, "Начинаю экспорт базы данных");
         isExporting = true;
-        dataInputService.exportToCSV();
+        dataProcessor.exportToCSV();
         isExporting = false;
         Notifier.instance().add(Notification.Level.SHOW_USER, "Экспорт завершён");
     }
 
     public Map<Integer, String> getFoldersIDsAndNames() {
+        if (tgClientWrapper == null) return Map.of();
         return tgClientWrapper.getFoldersIDsAndNames();
     }
 
     public Map<Long, String> getChannelsIDsAndNames() {
+        if (tgClientWrapper == null) return Map.of();
         return tgClientWrapper.getChannelsIDsAndNames();
     }
 
     public int getQueueSize() {
-        int queueSize = dataInputService.getQueueSize();
+        int queueSize = dataProcessor.getQueueSize();
         if (queueSize != 0) {
             Notifier.instance().add(Notification.Level.ONLY_TO_LOG, "Сообщений в обработке: " + queueSize);
         }
         return queueSize;
     }
 
-    public boolean aiServiceIsAvailable() {
+    private boolean aiServiceIsAvailable() {
         return apiHandler.checkHealth();
     }
 
@@ -149,7 +146,7 @@ public class Core implements ParserAssistant, AgentAssistant {
     }
 
     public void setQueryContext(QueryContext queryContext) {
-        agent.setQueryContext(queryContext);
+        db.setQueryContext(queryContext);
     }
 
     public void clearChat() {
@@ -179,7 +176,7 @@ public class Core implements ParserAssistant, AgentAssistant {
     }
 
     public boolean isBusy() {
-        return !dataInputService.queueIsEmpty() || isExporting || isParsing;
+        return !dataProcessor.queueIsEmpty() || isExporting || isParsing;
     }
 
     private Set<Long> prepareSenderIds(Set<Long> source, Function<Integer, Collection<Long>> getFolder) {
@@ -194,21 +191,22 @@ public class Core implements ParserAssistant, AgentAssistant {
         return result;
     }
 
-    private void startParser() {
+    private void start() {
         try {
             tgClientWrapper = new TgClientWrapper(clientFactory, this);
             tgClientWrapper.waitForExit();
             Thread.sleep(100); // ожидание завершения соединения с TDLib
         } catch (Exception e) {
             System.err.println("Исключение в главном потоке: " + e.getMessage());
-        } finally {
-            closeApp();
         }
     }
 
-    private void closeApp() {
+    public void closeApp() {
+        if (tgClientWrapper != null) {
+            tgClientWrapper.close();
+        }
         clientFactory.close();
-        dataInputService.stop();
+        dataProcessor.stop();
         executor.shutdown();
     }
 }

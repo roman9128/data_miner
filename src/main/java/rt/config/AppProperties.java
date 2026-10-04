@@ -1,7 +1,7 @@
 package rt.config;
 
 import rt.model.notification.Notification;
-import rt.core.Notifier;
+import rt.notifier.Notifier;
 
 import java.io.FileInputStream;
 import java.io.FileWriter;

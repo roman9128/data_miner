@@ -1,16 +1,19 @@
 package rt.data_processing;
 
 import it.tdlight.jni.TdApi;
-import rt.core.Notifier;
+import rt.model.document.ContentSource;
+import rt.notifier.Notifier;
 import rt.data_processing.classifier.Classifier;
 import rt.data_processing.embedder.EmbeddingClient;
 import rt.data_processing.ner.NERService;
 import rt.data_processing.noun_extractor.NounExtractor;
 import rt.data_processing.stats.TextStatisticsCalculator;
-import rt.model.message.*;
+import rt.model.document.DocumentRecord;
+import rt.model.document.RawMessage;
+import rt.model.document.TextStatistics;
 import rt.model.notification.Notification;
 import rt.storage.DatabaseManager;
-import rt.utils.DateTimeUtils;
+import rt.common_utils.DateTimeUtils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -19,17 +22,17 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class DataInputService {
+public class DataProcessor {
 
     private final DatabaseManager db;
     private final NERService nerService;
     private final Classifier classifier;
     private final NounExtractor nounExtractor;
     private final EmbeddingClient embeddingClient;
-    private final LinkedBlockingQueue<RawMessageRecord> rawMessageRecords = new LinkedBlockingQueue<>(1000);
+    private final LinkedBlockingQueue<RawMessage> rawMessages = new LinkedBlockingQueue<>(1000);
     private volatile boolean running = false;
 
-    public DataInputService(DatabaseManager db, EmbeddingClient embeddingClient, NounExtractor nounExtractor) {
+    public DataProcessor(DatabaseManager db, EmbeddingClient embeddingClient, NounExtractor nounExtractor) {
         this.db = db;
         this.nerService = new NERService();
         this.nounExtractor = nounExtractor;
@@ -42,28 +45,28 @@ public class DataInputService {
     }
 
     public boolean queueIsEmpty() {
-        return rawMessageRecords.isEmpty();
+        return rawMessages.isEmpty();
     }
 
-    public void addRawMessageRecord(RawMessageRecord rawMessageRecord) {
+    public void addRawMessageRecord(RawMessage rawMessage) {
         try {
-            rawMessageRecords.put(rawMessageRecord);
+            rawMessages.put(rawMessage);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            Notifier.instance().add(Notification.Level.SHOW_USER, e.toString());
+            Notifier.instance().add(Notification.Level.ONLY_TO_LOG, e.toString());
         }
     }
 
-    public void work() {
+    public void start() {
         if (running) {
             return;
         }
         running = true;
         try {
             while (running) {
-                var rmr = rawMessageRecords.poll(300, TimeUnit.MILLISECONDS);
-                if (rmr != null) {
-                    processRawMessageRecord(rmr);
+                var rm = rawMessages.poll(1, TimeUnit.SECONDS);
+                if (rm != null) {
+                    processRawMessageRecord(rm);
                 }
             }
         } catch (InterruptedException e) {
@@ -78,23 +81,22 @@ public class DataInputService {
     }
 
     public int getQueueSize() {
-        return rawMessageRecords.size();
+        return rawMessages.size();
     }
 
-    private void processRawMessageRecord(RawMessageRecord rawMessageRecord) {
-        MessageTypeText messageTypeText = extractTypeAndTextFromMessage(rawMessageRecord.message());
+    private void processRawMessageRecord(RawMessage rawMessage) {
+        MessageTypeText messageTypeText = extractTypeAndTextFromMessage(rawMessage.message());
         String text = messageTypeText.text();
         if (text == null || text.isBlank()) return;
-        MessageTies messageTies = getMessageTies(rawMessageRecord.message());
         TextStatistics textStatistics = TextStatisticsCalculator.calculate(text);
-        LocalDateTime messageDateTime = DateTimeUtils.getDateTime(rawMessageRecord.message().date);
+        LocalDateTime messageDateTime = DateTimeUtils.getDateTime(rawMessage.message().date);
         float[] textEmb = embeddingClient.createEmbedding(text);
 
-        MessageRecord messageRecord = new MessageRecord(
-                rawMessageRecord.message().id,
-                rawMessageRecord.message().chatId,
-                rawMessageRecord.chatName(),
-                rawMessageRecord.link(),
+        DocumentRecord documentRecord = new DocumentRecord(
+                String.valueOf(rawMessage.message().id),
+                String.valueOf(rawMessage.message().chatId),
+                rawMessage.chatName(),
+                rawMessage.link(),
                 LocalDateTime.now(ZoneId.systemDefault()),
                 messageDateTime,
                 messageDateTime.getYear(),
@@ -104,22 +106,19 @@ public class DataInputService {
                 messageDateTime.getHour(),
                 messageDateTime.getMinute(),
                 messageDateTime.getSecond(),
-                messageTypeText.type(),
+                messageTypeText.type().name(),
+                rawMessage.source().name(),
                 messageTypeText.text(),
                 messageTypeText.text().length(),
                 textStatistics.wordCount(),
                 textStatistics.averageWordLength(),
                 textStatistics.emojiCount(),
-                messageTies.replyToChatId(),
-                messageTies.replyToMessageId(),
-                messageTies.forwardOriginChatId(),
-                messageTies.forwardOriginMessageId(),
                 nounExtractor.extract(text),
                 nerService.extractEntities(text),
                 classifier.classify(text, textEmb),
                 textEmb
         );
-        db.createRecord(messageRecord);
+        db.createRecord(documentRecord);
     }
 
     private MessageTypeText extractTypeAndTextFromMessage(TdApi.Message message) {
@@ -127,43 +126,53 @@ public class DataInputService {
         switch (messageContent) {
             case TdApi.MessageText text -> {
                 return new MessageTypeText(
-                        MessageContentType.TEXT,
+                        ContentType.TEXT,
                         getRidOfNull(text.text.text));
             }
 
             case TdApi.MessagePhoto photo -> {
                 return new MessageTypeText(
-                        MessageContentType.PHOTO,
+                        ContentType.PHOTO,
                         getRidOfNull(photo.caption.text));
             }
             case TdApi.MessageVideo video -> {
                 return new MessageTypeText(
-                        MessageContentType.VIDEO,
+                        ContentType.VIDEO,
                         getRidOfNull(video.caption.text));
             }
             case TdApi.MessageDocument document -> {
                 return new MessageTypeText(
-                        MessageContentType.DOCUMENT,
+                        ContentType.DOCUMENT,
                         getRidOfNull(document.caption.text));
             }
             case TdApi.MessageAudio audio -> {
                 return new MessageTypeText(
-                        MessageContentType.AUDIO,
+                        ContentType.AUDIO,
                         getRidOfNull(audio.caption.text));
             }
             case TdApi.MessagePoll poll -> {
                 return new MessageTypeText(
-                        MessageContentType.POLL,
+                        ContentType.POLL,
                         getPollTexts(poll));
             }
             case TdApi.MessageAnimation animation -> {
                 return new MessageTypeText(
-                        MessageContentType.ANIMATION,
+                        ContentType.ANIMATION,
                         getRidOfNull(animation.caption.text));
+            }
+            case TdApi.MessageVideoNote videoNote -> {
+                return new MessageTypeText(
+                        ContentType.VIDEO_NOTE,
+                        "");
+            }
+            case TdApi.MessageVoiceNote voiceNote -> {
+                return new MessageTypeText(
+                        ContentType.VOICE_NOTE,
+                        getRidOfNull(voiceNote.caption.text));
             }
             default -> {
                 return new MessageTypeText(
-                        MessageContentType.MISC,
+                        ContentType.MISC,
                         getRidOfNull(messageContent.toString())
                 );
             }
@@ -174,19 +183,6 @@ public class DataInputService {
         return text == null ? "" : text;
     }
 
-    private MessageTies getMessageTies(TdApi.Message message) {
-        long replyToChatId = 0, replyToMessageId = 0, forwardOriginChatId = 0, forwardOriginMessageId = 0;
-        if (message.replyTo != null && message.replyTo instanceof TdApi.MessageReplyToMessage messageReplyToMessage) {
-            replyToChatId = messageReplyToMessage.chatId;
-            replyToMessageId = messageReplyToMessage.messageId;
-        }
-        if (message.forwardInfo != null && message.forwardInfo.origin instanceof TdApi.MessageOriginChannel originChannel) {
-            forwardOriginChatId = originChannel.chatId;
-            forwardOriginMessageId = originChannel.messageId;
-        }
-        return new MessageTies(replyToChatId, replyToMessageId, forwardOriginChatId, forwardOriginMessageId);
-    }
-
     private String getPollTexts(TdApi.MessagePoll poll) {
         String question = getRidOfNull(poll.poll.question);
         String options = Arrays.stream(poll.poll.options)
@@ -195,5 +191,21 @@ public class DataInputService {
                 .map(o -> "\n- " + o)
                 .collect(Collectors.joining());
         return question + options;
+    }
+
+    private record MessageTypeText(ContentType type, String text) {
+    }
+
+    enum ContentType {
+        TEXT,
+        PHOTO,
+        VIDEO,
+        VIDEO_NOTE,
+        VOICE_NOTE,
+        DOCUMENT,
+        AUDIO,
+        POLL,
+        ANIMATION,
+        MISC
     }
 }

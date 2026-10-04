@@ -2,7 +2,7 @@ package rt.data_processing.classifier.nlp;
 
 import opennlp.tools.doccat.DoccatModel;
 import opennlp.tools.doccat.DocumentCategorizerME;
-import rt.core.Notifier;
+import rt.notifier.Notifier;
 import rt.model.notification.Notification;
 
 import java.io.File;

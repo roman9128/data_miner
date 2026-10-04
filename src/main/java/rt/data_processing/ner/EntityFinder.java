@@ -1,7 +1,7 @@
 package rt.data_processing.ner;
 
 import rt.model.ne.NamedEntity;
-import rt.utils.TextUtils;
+import rt.common_utils.TextUtils;
 
 import java.util.*;
 

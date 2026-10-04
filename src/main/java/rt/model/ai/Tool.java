@@ -1,7 +1,7 @@
 package rt.model.ai;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import rt.utils.JsonUtils;
+import rt.common_utils.JsonUtils;
 
 import java.util.Map;
 
@@ -14,8 +14,6 @@ public interface Tool {
     String getParameters();
 
     String execute(String arguments);
-
-    void setQueryContext(QueryContext queryContext);
 
     @JsonValue
     default Map<String, Object> toJson() {

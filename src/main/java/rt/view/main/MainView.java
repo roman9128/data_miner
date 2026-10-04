@@ -6,7 +6,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import rt.core.Core;
-import rt.core.Notifier;
+import rt.notifier.Notifier;
 import rt.model.ai.Usage;
 import rt.model.notification.Notification;
 
@@ -17,12 +17,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class MainView {
+
     private Core core;
     private Stage stage;
     private Controller controller;
     private ScheduledExecutorService sourceUpdater;
     private ScheduledExecutorService queueUpdater;
-    private NotificationHandler notificationHandler;
+    private ScheduledExecutorService notificationUpdater;
     private Map<Integer, String> lastFolders = Map.of();
     private Map<Long, String> lastChannels = Map.of();
 
@@ -30,7 +31,10 @@ public class MainView {
         this.core = core;
     }
 
-    public void startInteractions() {
+    public void start() {
+        Platform.startup(() -> {
+        });
+
         Platform.runLater(() -> {
             try {
                 show();
@@ -44,7 +48,7 @@ public class MainView {
         controller.showAgentsAnswer(answer);
     }
 
-    public void showTokenUsage(Usage usage){
+    public void showTokenUsage(Usage usage) {
         controller.showTokenUsage(usage);
     }
 
@@ -61,23 +65,18 @@ public class MainView {
         stage.setMinHeight(700);
         controller.setCore(core);
         controller.loadDatabaseContext();
-        notificationHandler = new NotificationHandler();
-        notificationHandler.setController(controller);
-        notificationHandler.start();
         updateSources(controller);
         startSourceUpdater(controller);
         startQueueUpdater(controller);
+        startNotificationUpdater(controller);
         stage.show();
         stage.setOnCloseRequest(event -> {
             event.consume();
             Platform.runLater(() -> {
                 stopSourceUpdater();
                 stopQueueUpdater();
-                if (notificationHandler != null) {
-                    notificationHandler.stop();
-                    notificationHandler = null;
-                }
-                core.close();
+                stopNotificationUpdater();
+                core.closeApp();
                 stage.close();
                 Platform.exit();
             });
@@ -137,5 +136,37 @@ public class MainView {
         }
         queueUpdater.shutdownNow();
         queueUpdater = null;
+    }
+
+    private void startNotificationUpdater(Controller controller) {
+        notificationUpdater = Executors.newSingleThreadScheduledExecutor();
+        notificationUpdater.scheduleWithFixedDelay(
+                () -> updateNotification(controller),
+                2000,
+                500,
+                TimeUnit.MILLISECONDS
+        );
+    }
+
+    private void updateNotification(Controller controller) {
+        try {
+            Notification n = Notifier.instance().poll();
+            if (n != null) {
+                String text = n.text();
+                if (text == null || text.isBlank()) return;
+                Platform.runLater(() -> controller.addNotification(text));
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private void stopNotificationUpdater() {
+        if (notificationUpdater == null) {
+            return;
+        }
+        notificationUpdater.shutdownNow();
+        notificationUpdater = null;
+        Notifier.shutdownLogger();
     }
 }

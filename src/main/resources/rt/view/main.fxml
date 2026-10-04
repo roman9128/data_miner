@@ -55,7 +55,7 @@
                     </center>
                     <bottom>
                         <HBox alignment="CENTER_LEFT" spacing="12" styleClass="bottom-bar">
-                            <Label fx:id="queueSizeLabel" styleClass="queue-status-label" text="Нет сообщений в обработке" />
+                            <Label fx:id="queueSizeLabel" styleClass="queue-label" text="Нет сообщений в обработке" />
                             <HBox HBox.hgrow="ALWAYS" />
                             <Button onAction="#onExportToCSV" styleClass="secondary-button" text="Экспорт CSV" />
                             <Button onAction="#onSearch" styleClass="primary-button" text="Собрать данные" />

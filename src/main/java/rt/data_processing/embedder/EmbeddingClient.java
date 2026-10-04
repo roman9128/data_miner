@@ -1,7 +1,7 @@
 package rt.data_processing.embedder;
 
 import rt.api.ExternalAPIHandler;
-import rt.core.Notifier;
+import rt.notifier.Notifier;
 import rt.model.notification.Notification;
 
 import java.util.List;

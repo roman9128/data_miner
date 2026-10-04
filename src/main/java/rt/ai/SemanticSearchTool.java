@@ -1,20 +1,21 @@
 package rt.ai;
 
 import rt.data_processing.embedder.EmbeddingClient;
-import rt.utils.TextUtils;
-import rt.utils.VectorUtils;
-import rt.storage.DatabaseManager;
-import rt.model.ai.QueryContext;
 import rt.model.ai.Tool;
-import rt.model.message.InfoToShow;
+import rt.model.document.InfoToShow;
+import rt.storage.DatabaseManager;
+import rt.common_utils.TextUtils;
+import rt.common_utils.VectorUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class SemanticSearchTool implements Tool {
 
     private final DatabaseManager db;
     private final EmbeddingClient embeddingClient;
-    private QueryContext queryContext;
 
     public SemanticSearchTool(DatabaseManager db, EmbeddingClient embeddingClient) {
         this.db = db;
@@ -47,7 +48,7 @@ public class SemanticSearchTool implements Tool {
     private List<InfoToShow> findBySemantic(String query) {
         float[] queryEmb = embeddingClient.createEmbedding(query);
         if (queryEmb.length == 0) return List.of();
-        Map<Long, float[]> messagesEmb = db.getMessageIdsAndEmbeddings(queryContext);
+        Map<Long, float[]> messagesEmb = db.getMessageIdsAndEmbeddings();
         Map<Long, Double> candidatesMessageIds = new HashMap<>();
         for (Map.Entry<Long, float[]> entry : messagesEmb.entrySet()) {
             double similarity = VectorUtils.cosineSimilarity(queryEmb, entry.getValue());
@@ -74,10 +75,5 @@ public class SemanticSearchTool implements Tool {
             result.add(list.get(i).getKey());
         }
         return result;
-    }
-
-    @Override
-    public void setQueryContext(QueryContext queryContext) {
-        this.queryContext = queryContext;
     }
 }

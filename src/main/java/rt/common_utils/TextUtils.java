@@ -1,7 +1,7 @@
-package rt.utils;
+package rt.common_utils;
 
 import opennlp.tools.stemmer.snowball.SnowballStemmer;
-import rt.model.message.InfoToShow;
+import rt.model.document.InfoToShow;
 
 import java.util.List;
 import java.util.Locale;

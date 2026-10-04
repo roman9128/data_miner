@@ -1,9 +1,10 @@
-package rt.model.message;
+package rt.model.document;
 
 import it.tdlight.jni.TdApi;
 
-public record RawMessageRecord(
+public record RawMessage(
         TdApi.Message message,
+        ContentSource source,
         String chatName,
         String link
 ) {

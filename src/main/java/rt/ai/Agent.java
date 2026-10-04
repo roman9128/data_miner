@@ -2,21 +2,21 @@ package rt.ai;
 
 import rt.api.ExternalAPIHandler;
 import rt.config.AiProperties;
-import rt.core.AgentAssistant;
-import rt.core.Notifier;
+import rt.core.AssistantAgent;
+import rt.notifier.Notifier;
 import rt.data_processing.embedder.EmbeddingClient;
 import rt.data_processing.noun_extractor.NounExtractor;
 import rt.model.notification.Notification;
 import rt.storage.DatabaseManager;
 import rt.model.ai.*;
-import rt.utils.JsonUtils;
+import rt.common_utils.JsonUtils;
 
 import java.io.IOException;
 import java.util.List;
 
 public class Agent {
 
-    private final AgentAssistant assistant;
+    private final AssistantAgent assistant;
     private final ExternalAPIHandler api;
     private final Dialogue dialogue;
     private final Usage usage = new Usage(0, 0, 0);
@@ -24,13 +24,14 @@ public class Agent {
     private static final int MAX_ITERATIONS = 10;
     private volatile boolean isThinking;
 
-    public Agent(ExternalAPIHandler api, DatabaseManager db, EmbeddingClient embeddingClient, NounExtractor nounExtractor, AgentAssistant assistant) {
+    public Agent(ExternalAPIHandler api, DatabaseManager db, EmbeddingClient embeddingClient, NounExtractor nounExtractor, AssistantAgent assistant) {
         this.assistant = assistant;
         this.api = api;
         this.availableTools = List.of(
                 new LastSearchTool(db),
                 new ExactSearchTool(db, nounExtractor),
                 new SemanticSearchTool(db, embeddingClient),
+                new TopicSearchTool(db),
                 new DatabaseStatsTool(db)
         );
         this.dialogue = new Dialogue.Builder()
@@ -86,9 +87,5 @@ public class Agent {
 
     public boolean isThinking() {
         return isThinking;
-    }
-
-    public void setQueryContext(QueryContext queryContext) {
-        availableTools.forEach(t -> t.setQueryContext(queryContext));
     }
 }

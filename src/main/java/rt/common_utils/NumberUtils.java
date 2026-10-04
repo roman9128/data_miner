@@ -1,4 +1,4 @@
-package rt.utils;
+package rt.common_utils;
 
 import java.util.Random;
 
