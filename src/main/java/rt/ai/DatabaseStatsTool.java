@@ -1,18 +1,17 @@
 package rt.ai;
 
-import rt.storage.DatabaseManager;
-import rt.model.ai.QueryContext;
 import rt.model.ai.Tool;
 import rt.model.db_info.DatabaseStats;
+import rt.storage.DatabaseManager;
 
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class DatabaseStatsTool implements Tool {
+class DatabaseStatsTool implements Tool {
 
     private final DatabaseManager db;
 
-    public DatabaseStatsTool(DatabaseManager db) {
+    DatabaseStatsTool(DatabaseManager db) {
         this.db = db;
     }
 

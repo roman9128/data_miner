@@ -2,18 +2,21 @@ package rt.telegram;
 
 import it.tdlight.client.*;
 import it.tdlight.jni.TdApi;
+import rt.common_utils.DateTime;
 import rt.model.document.ContentSource;
+import rt.model.document.ContentType;
+import rt.model.document.RawMessage;
 import rt.notifier.Notifier;
 import rt.core.AssistantParser;
 import rt.config.Credentials;
 import rt.config.AppProperties;
 import rt.model.notification.Notification;
-import rt.model.document.RawMessage;
-import rt.common_utils.NumberUtils;
+import rt.common_utils.Numbers;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -179,7 +182,7 @@ public final class TgClientWrapper implements AutoCloseable {
                         break;
                     }
                 }
-                Thread.sleep(NumberUtils.giveRandomNumber());
+                Thread.sleep(Numbers.giveRandomNumber());
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 Notifier.instance().add(Notification.Level.ONLY_TO_LOG, "Загрузка сообщений прервана: " + e);
@@ -212,9 +215,51 @@ public final class TgClientWrapper implements AutoCloseable {
     private void prepareRecords() {
         while (!chatHistoryLoader.isEmpty()) {
             TdApi.Message message = chatHistoryLoader.takeMessage();
-            String senderName = chats.get(message.chatId).title;
-            String link = getMsgLink(message);
-            assistant.addRawMessageRecord(new RawMessage(message, ContentSource.TELEGRAM, senderName, link));
+            var m = MessageDataExtractor.extractTypeAndTextFromTelegramMessage(message);
+
+            assistant.addRawMessage(
+                    new RawMessage() {
+                        @Override
+                        public ContentSource contentSource() {
+                            return ContentSource.TELEGRAM;
+                        }
+
+                        @Override
+                        public String sourceName() {
+                            return chats.get(message.chatId).title;
+                        }
+
+                        @Override
+                        public String sourceId() {
+                            return String.valueOf(message.chatId);
+                        }
+
+                        @Override
+                        public String sourceDocumentId() {
+                            return String.valueOf(message.id);
+                        }
+
+                        @Override
+                        public ContentType contentType() {
+                            return m.contentType();
+                        }
+
+                        @Override
+                        public LocalDateTime dateTime() {
+                            return DateTime.getDateTime(message.date);
+                        }
+
+                        @Override
+                        public String link() {
+                            return getMsgLink(message);
+                        }
+
+                        @Override
+                        public String text() {
+                            return m.text();
+                        }
+                    }
+            );
         }
     }
 

@@ -9,7 +9,7 @@ import rt.data_processing.noun_extractor.NounExtractor;
 import rt.model.notification.Notification;
 import rt.storage.DatabaseManager;
 import rt.model.ai.*;
-import rt.common_utils.JsonUtils;
+import rt.common_utils.Json;
 
 import java.io.IOException;
 import java.util.List;
@@ -67,7 +67,7 @@ public class Agent {
                     dialogue.addToolMessage(call.id(), "Tool '%s' is unavailable. Do not call it again.".formatted(call.name()));
                     continue;
                 }
-                String result = tool.execute(JsonUtils.getQuery(call.arguments()));
+                String result = tool.execute(Json.getQuery(call.arguments()));
                 dialogue.addToolMessage(call.id(), result);
             }
         }

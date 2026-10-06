@@ -31,7 +31,6 @@ public record DocumentRecord(
         String text,
         int textLength,
         int wordCount,
-        double averageWordLength,
         int emojiCount,
         List<Noun> nouns,
         Set<NamedEntity> namedEntities,

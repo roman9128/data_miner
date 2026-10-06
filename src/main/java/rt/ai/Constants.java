@@ -18,20 +18,20 @@ public final class Constants {
             - exact_search:
               Use when the user asks to find a specific literal word, name, phrase, term, code, or other exact text occurrence.
             - topic_search:
-              Use when the user wants to find messages of a specific topic from a provided list of available topics.
+              Use when the user wants to find messages belonging to a specific topic from the provided list of available topics.
             - last_messages_search:
-              Use when the user asks for the latest messages in the database.
+              Use when the user asks for the newest messages in the database.
             - get_database_stats:
               Use when the user asks about the database as a whole, its size, structure, statistics, date range, or aggregated topic/entity information.
             If a request requires several kinds of information, use multiple tools when necessary.
             Never use search tools to retrieve the entire database.
             If the requested analysis requires more data than can reasonably be retrieved, ask the user to narrow the request by topic, time period, chat, or another relevant criterion.
-            If the user looks for the messages of a topic which is not included to the database, tell the user that request cannot be done because the database has no messages of that topic.
-            You have only %d tool calls available for one user's request.
+            If the user asks for messages belonging to a topic that is not included in the database's available topics, tell the user that the request cannot be fulfilled because the database contains no messages for that topic.
+            You have only %d tool calls available for a user's request.
             Use the available calls efficiently.
             Analyze the retrieved information and answer the user's original question.
             If the required information cannot be found in the database, say so clearly.
-            Your answers must be informative and as short as it possible.
+            Your answers must be informative and as short as possible.
             """;
 
     static final String SEMANTIC_SEARCH_TOOL_NAME = "semantic_search";
@@ -41,7 +41,7 @@ public final class Constants {
             Include relevant context, names, terms, events, actions, dates, and other useful details when available.
             More detailed queries generally improve semantic search quality.
             Semantic search is available only for Russian-language content.
-            The tool returns up to %d matching messages with their link, chat name, text, and date of publishing.
+            The tool returns up to %d matching messages with their link, chat name, text, and publication date.
             """;
     static final String SEMANTIC_SEARCH_TOOL_PARAMS = """
             {
@@ -61,7 +61,7 @@ public final class Constants {
     static final String EXACT_SEARCH_TOOL_DESC = """
             Search messages by exact text occurrence.
             The search is case-insensitive and treats the query as literal text, not as a regular expression.
-            The tool returns up to %d matching messages with their link, chat name, text, and date of publishing.
+            The tool returns up to %d matching messages with their link, chat name, text, and publication date.
             """;
     static final String EXACT_SEARCH_TOOL_PARAMS = """
             {
@@ -79,8 +79,8 @@ public final class Constants {
     static final String TOPIC_SEARCH_TOOL_DESC = """
             Search messages by topic label.
             The search requires one topic from the following list: %s.
-            Use only provided exact topic labels.
-            The tool returns up to %d matching messages with their link, chat name, text, and date of publishing.
+            Use only the exact topic labels provided in this list.
+            The tool returns up to %d matching messages with their link, chat name, text, and publication date.
             """;
     static final String TOPIC_SEARCH_TOOL_PARAMS = """
              {
@@ -97,7 +97,7 @@ public final class Constants {
     static final String LAST_SEARCH_TOOL_NAME = "last_messages_search";
     static final String LAST_SEARCH_TOOL_DESC = """
             Search the newest messages in the database.
-            The tool returns up to %d matching messages with their link, chat name, text, and date of publishing.
+            The tool returns up to %d matching messages with their link, chat name, text, and publication date.
             """;
     static final String LAST_SEARCH_TOOL_PARAMS = """
             {
@@ -117,7 +117,7 @@ public final class Constants {
             - number of active days;
             - date range of stored messages;
             - top %d topics by number of associated messages;
-            - top %d named entities by number of associated messages.
+            - top %d named entities by the number of associated messages.
             A message can belong to multiple topics and contain multiple named entities.
             Therefore, one message can be counted in several groups, and the sum of topic/entity counts can exceed the total number of messages.
             The tool does not return message contents.

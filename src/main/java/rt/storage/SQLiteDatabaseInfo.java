@@ -38,7 +38,6 @@ final class SQLiteDatabaseInfo {
                     text                TEXT,
                     text_length         INTEGER NOT NULL,
                     word_count          INTEGER NOT NULL,
-                    average_word_length REAL NOT NULL,
                     emoji_count         INTEGER NOT NULL,
                 
                     embedding                 BLOB,

@@ -3,8 +3,8 @@ package rt.storage;
 import rt.model.ai.QueryContext;
 import rt.model.document.InfoToShow;
 import rt.model.noun.Noun;
-import rt.common_utils.TextUtils;
-import rt.common_utils.VectorUtils;
+import rt.common_utils.Text;
+import rt.common_utils.Vector;
 
 import java.sql.*;
 import java.util.*;
@@ -29,7 +29,7 @@ final class SQLiteDataOutput {
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
                     long id = resultSet.getLong("id");
-                    float[] embedding = VectorUtils.byteArrayToFloatArray(resultSet.getBytes("embedding"));
+                    float[] embedding = Vector.byteArrayToFloatArray(resultSet.getBytes("embedding"));
                     embeddings.put(id, embedding);
                 }
             }
@@ -328,7 +328,7 @@ final class SQLiteDataOutput {
     }
 
     List<Long> findEntityIds(String query) throws SQLException {
-        String pattern = "%" + TextUtils.escapeLikePattern(query) + "%";
+        String pattern = "%" + Text.escapeLikePattern(query) + "%";
 
         String sql = """
                 SELECT DISTINCT ne.entity_id

@@ -1,7 +1,7 @@
 package rt.data_processing.ner;
 
 import rt.model.ne.NamedEntity;
-import rt.common_utils.TextUtils;
+import rt.common_utils.Text;
 
 import java.util.*;
 
@@ -84,13 +84,13 @@ class EntityFinder {
     private List<String> stem(String text) {
         if (text == null || text.isBlank()) return List.of();
 
-        String[] words = TextUtils.getWordsAsLettersAndNumbersFrom(text);
+        String[] words = Text.getWordsAsLettersAndNumbersFrom(text);
         if (words.length == 0) return List.of();
 
         List<String> result = new ArrayList<>();
 
         for (String word : words) {
-            if (!word.isBlank()) result.add(TextUtils.stem(word));
+            if (!word.isBlank()) result.add(Text.stem(word));
         }
         return result;
     }

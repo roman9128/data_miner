@@ -1,11 +1,22 @@
 package rt.model.document;
 
-import it.tdlight.jni.TdApi;
+import java.time.LocalDateTime;
 
-public record RawMessage(
-        TdApi.Message message,
-        ContentSource source,
-        String chatName,
-        String link
-) {
+public interface RawMessage {
+
+    ContentSource contentSource();
+
+    String sourceName();
+
+    String sourceId();
+
+    String sourceDocumentId();
+
+    ContentType contentType();
+
+    LocalDateTime dateTime();
+
+    String link();
+
+    String text();
 }

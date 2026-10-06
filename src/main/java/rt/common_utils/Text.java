@@ -6,11 +6,11 @@ import rt.model.document.InfoToShow;
 import java.util.List;
 import java.util.Locale;
 
-public final class TextUtils {
+public final class Text {
 
     private static final SnowballStemmer stemmer = new SnowballStemmer(SnowballStemmer.ALGORITHM.RUSSIAN);
 
-    private TextUtils() {
+    private Text() {
     }
 
     public static String[] getWordsAsLettersAndNumbersFrom(String text) {
@@ -65,5 +65,9 @@ public final class TextUtils {
                 .replace("\\", "\\\\")
                 .replace("%", "\\%")
                 .replace("_", "\\_");
+    }
+
+    public static String getRidOfNull(String text) {
+        return text == null ? "" : text;
     }
 }

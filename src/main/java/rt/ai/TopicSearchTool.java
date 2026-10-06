@@ -3,15 +3,15 @@ package rt.ai;
 import rt.model.ai.Tool;
 import rt.model.document.InfoToShow;
 import rt.storage.DatabaseManager;
-import rt.common_utils.TextUtils;
+import rt.common_utils.Text;
 
 import java.util.List;
 
-public class TopicSearchTool implements Tool {
+class TopicSearchTool implements Tool {
 
     private final DatabaseManager db;
 
-    public TopicSearchTool(DatabaseManager db) {
+    TopicSearchTool(DatabaseManager db) {
         this.db = db;
     }
 
@@ -36,6 +36,6 @@ public class TopicSearchTool implements Tool {
         if (arguments.isBlank()) return "";
         List<InfoToShow> messages = db.searchMessagesByTopic(arguments, Constants.MAX_MESSAGES);
         if (messages.isEmpty()) return "";
-        return TextUtils.format(messages);
+        return Text.format(messages);
     }
 }

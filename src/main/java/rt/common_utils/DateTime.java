@@ -6,11 +6,11 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-public final class DateTimeUtils {
+public final class DateTime {
 
     private final static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
 
-    private DateTimeUtils() {
+    private DateTime() {
     }
 
     public static String getStringOf(LocalDateTime ldt) {

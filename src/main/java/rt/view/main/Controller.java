@@ -123,7 +123,7 @@ public class Controller {
 
     @FXML
     private void onSearch() {
-        core.parseMessages(Tab1Search.instance().getSource(), dateFrom.getValue(), dateTo.getValue());
+        core.parseTelegramMessages(Tab1Search.instance().getSource(), dateFrom.getValue(), dateTo.getValue());
     }
 
     @FXML

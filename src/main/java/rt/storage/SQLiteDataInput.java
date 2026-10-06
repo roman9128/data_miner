@@ -3,8 +3,8 @@ package rt.storage;
 import rt.model.document.DocumentRecord;
 import rt.model.ne.NamedEntity;
 import rt.model.noun.Noun;
-import rt.common_utils.DateTimeUtils;
-import rt.common_utils.VectorUtils;
+import rt.common_utils.DateTime;
+import rt.common_utils.Vector;
 
 import java.sql.*;
 import java.util.List;
@@ -72,7 +72,6 @@ final class SQLiteDataInput {
                     text,
                     text_length,
                     word_count,
-                    average_word_length,
                     emoji_count,
                 
                     embedding
@@ -80,10 +79,11 @@ final class SQLiteDataInput {
                 VALUES (
                     ?, ?, ?, ?, ?,
                     ?, ?, ?, ?, ?, ?, ?, ?,
-                    ?, ?, ?, ?, ?, ?, ?,
+                    ?, ?, ?, ?, ?, ?,
                     ?
                 )
                 ON CONFLICT (
+                    content_source,
                     source_message_id,
                     source_id
                 )
@@ -102,11 +102,9 @@ final class SQLiteDataInput {
                     publish_second = excluded.publish_second,
                 
                     content_type = excluded.content_type,
-                    content_source = excluded.content_source,
                     text = excluded.text,
                     text_length = excluded.text_length,
                     word_count = excluded.word_count,
-                    average_word_length = excluded.average_word_length,
                     emoji_count = excluded.emoji_count,
                 
                     embedding = excluded.embedding
@@ -119,8 +117,8 @@ final class SQLiteDataInput {
             statement.setString(i++, documentRecord.sourceId());
             statement.setString(i++, documentRecord.sourceName());
             statement.setString(i++, documentRecord.link());
-            statement.setString(i++, DateTimeUtils.getStringOf(documentRecord.parsedAt()));
-            statement.setString(i++, DateTimeUtils.getStringOf(documentRecord.publishedAt()));
+            statement.setString(i++, DateTime.getStringOf(documentRecord.parsedAt()));
+            statement.setString(i++, DateTime.getStringOf(documentRecord.publishedAt()));
             statement.setInt(i++, documentRecord.publishYear());
             statement.setInt(i++, documentRecord.publishMonth().getValue());
             statement.setInt(i++, documentRecord.publishDayOfMonth());
@@ -133,12 +131,11 @@ final class SQLiteDataInput {
             statement.setString(i++, documentRecord.text());
             statement.setInt(i++, documentRecord.textLength());
             statement.setInt(i++, documentRecord.wordCount());
-            statement.setDouble(i++, documentRecord.averageWordLength());
             statement.setInt(i++, documentRecord.emojiCount());
 
             float[] vector = documentRecord.embedding();
             if (vector != null && vector.length > 0) {
-                statement.setBytes(i++, VectorUtils.floatArrayToByteArray(vector));
+                statement.setBytes(i++, Vector.floatArrayToByteArray(vector));
             } else {
                 statement.setBytes(i++, null);
             }

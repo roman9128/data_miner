@@ -2,7 +2,7 @@ package rt.common_utils;
 
 import java.nio.ByteBuffer;
 
-public final class VectorUtils {
+public final class Vector {
 
     public static double cosineSimilarity(float[] a, float[] b) {
 

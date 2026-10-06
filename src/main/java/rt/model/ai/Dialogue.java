@@ -75,7 +75,7 @@ public class Dialogue {
         private String model;
         private final List<AiChatMessage> aiChatMessages = new ArrayList<>();
         private final List<Tool> tools = new ArrayList<>();
-        private double temperature = 0.4;
+        private double temperature = 0.2;
         private boolean stream = false;
 
         public Builder setModel(String model) {

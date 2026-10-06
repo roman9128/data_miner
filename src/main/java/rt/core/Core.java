@@ -3,7 +3,8 @@ package rt.core;
 import it.tdlight.client.SimpleTelegramClientFactory;
 import rt.ai.Agent;
 import rt.api.ExternalAPIHandler;
-import rt.common_utils.DateTimeUtils;
+import rt.common_utils.DateTime;
+import rt.common_utils.Numbers;
 import rt.data_processing.DataProcessor;
 import rt.data_processing.embedder.EmbeddingClient;
 import rt.data_processing.noun_extractor.NounExtractor;
@@ -19,13 +20,10 @@ import rt.view.auth.AuthUI;
 import rt.view.main.MainView;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Function;
 
 public class Core implements AssistantParser, AssistantAgent {
 
@@ -72,12 +70,12 @@ public class Core implements AssistantParser, AssistantAgent {
     }
 
     @Override
-    public void addRawMessageRecord(RawMessage rawMessage) {
+    public void addRawMessage(RawMessage rawMessage) {
         dataProcessor.addRawMessageRecord(rawMessage);
     }
 
-    public void parseMessages(Set<Long> source, LocalDate dateFrom, LocalDate dateTo) {
-        if (!aiServiceIsAvailable()) {
+    public void parseTelegramMessages(Set<Long> source, LocalDate dateFrom, LocalDate dateTo) {
+        if (!auxServiceIsAvailable()) {
             Notifier.instance().add(Notification.Level.SHOW_USER, "Вспомогательный сервис для анализа текста недоступен. Проверьте, что он запущен в Docker");
         }
 
@@ -92,9 +90,9 @@ public class Core implements AssistantParser, AssistantAgent {
         }
 
         isParsing = true;
-        Set<Long> senderIds = prepareSenderIds(source, tgClientWrapper::getChatsInFolder);
-        long unixDateFrom = DateTimeUtils.getUnixDateFrom(dateFrom);
-        long unixDateTo = DateTimeUtils.getUnixDateTo(dateTo);
+        Set<Long> senderIds = Numbers.prepareSenderIds(source, tgClientWrapper::getChatsInFolder);
+        long unixDateFrom = DateTime.getUnixDateFrom(dateFrom);
+        long unixDateTo = DateTime.getUnixDateTo(dateTo);
 
         executor.submit(() -> {
             senderIds.forEach(channelId -> tgClientWrapper.loadChannelsHistory(channelId, unixDateFrom, unixDateTo));
@@ -133,7 +131,7 @@ public class Core implements AssistantParser, AssistantAgent {
         return queueSize;
     }
 
-    private boolean aiServiceIsAvailable() {
+    private boolean auxServiceIsAvailable() {
         return apiHandler.checkHealth();
     }
 
@@ -177,18 +175,6 @@ public class Core implements AssistantParser, AssistantAgent {
 
     public boolean isBusy() {
         return !dataProcessor.queueIsEmpty() || isExporting || isParsing;
-    }
-
-    private Set<Long> prepareSenderIds(Set<Long> source, Function<Integer, Collection<Long>> getFolder) {
-        Set<Long> result = new TreeSet<>();
-        source.forEach(n -> {
-            if (n < 0) {
-                result.add(n);
-            } else if (n > 0) {
-                result.addAll(getFolder.apply(n.intValue()));
-            }
-        });
-        return result;
     }
 
     private void start() {

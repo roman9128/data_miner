@@ -22,12 +22,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public final class Tab3AI {
     private static final Tab3AI INSTANCE = new Tab3AI();
     private VBox thinkingMessage;
-    private final Parser markdownParser = Parser.builder()
-            .extensions(List.of(TablesExtension.create()))
-            .build();
-    private final HtmlRenderer markdownRenderer = HtmlRenderer.builder()
-            .extensions(List.of(TablesExtension.create()))
-            .build();
+    private final Parser markdownParser = Parser.builder().extensions(List.of(TablesExtension.create())).build();
+    private final HtmlRenderer markdownRenderer = HtmlRenderer.builder().extensions(List.of(TablesExtension.create())).build();
 
     private Tab3AI() {
     }
@@ -300,10 +296,6 @@ public final class Tab3AI {
                 
                             background: transparent;
                 
-                            /*
-                             * WebView не должен иметь собственного скролла.
-                             * Высота WebView будет равна высоте всего документа.
-                             */
                             overflow: hidden;
                         }
                 
@@ -319,17 +311,8 @@ public final class Tab3AI {
                             font-family: "Segoe UI", Arial, sans-serif;
                             font-size: 14px;
                             line-height: 1.55;
-                
                             color: #1e293b;
-                
-                            /*
-                             * Запрещаем внутреннюю прокрутку WebView.
-                             */
                             overflow: hidden;
-                
-                            /*
-                             * Текст всегда переносится внутри доступной ширины.
-                             */
                             overflow-wrap: anywhere;
                             word-wrap: break-word;
                             word-break: break-word;
@@ -440,11 +423,6 @@ public final class Tab3AI {
                 
                             border: 1px solid #e2e8f0;
                             border-radius: 8px;
-                
-                            /*
-                             * Код тоже переносится.
-                             * Горизонтального скролла нет.
-                             */
                             overflow: hidden;
                 
                             white-space: pre-wrap;
@@ -497,10 +475,6 @@ public final class Tab3AI {
                         table {
                             width: 100%;
                             max-width: 100%;
-                
-                            /*
-                             * Таблица никогда не должна расширять WebView.
-                             */
                             table-layout: fixed;
                 
                             border-collapse: collapse;

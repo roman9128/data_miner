@@ -2,7 +2,7 @@ package rt.data_processing.classifier.vector;
 
 import rt.notifier.Notifier;
 import rt.data_processing.embedder.EmbeddingClient;
-import rt.common_utils.VectorUtils;
+import rt.common_utils.Vector;
 import rt.model.notification.Notification;
 
 import java.util.*;
@@ -33,12 +33,12 @@ public class VectorClassifier {
 
     private double findSimilarity(float[] textEmb, float[] centroid, float[][] referenceEmbeddings) {
         if (referenceEmbeddings.length == 0) return 0.0;
-        if (VectorUtils.cosineSimilarity(textEmb, centroid) < 0.6) return 0.0;
+        if (Vector.cosineSimilarity(textEmb, centroid) < 0.6) return 0.0;
 
         double sum = 0.0;
 
         for (float[] reference : referenceEmbeddings) {
-            double similarity = VectorUtils.cosineSimilarity(textEmb, reference);
+            double similarity = Vector.cosineSimilarity(textEmb, reference);
             double score = Math.clamp((similarity - MIN_SIMILARITY) / (GOOD_SIMILARITY - MIN_SIMILARITY), 0.0, 1.0);
             sum += score * score;
         }
@@ -56,7 +56,7 @@ public class VectorClassifier {
         for (Map.Entry<String, List<String>> entry : topicReferencesMap.entrySet()) {
             try {
                 float[][] referenceEmbeddings = embeddingClient.createEmbeddings(entry.getValue());
-                float[] topicCentroid = VectorUtils.computeCentroid(referenceEmbeddings);
+                float[] topicCentroid = Vector.computeCentroid(referenceEmbeddings);
                 topics.add(new Topic(entry.getKey(), topicCentroid, referenceEmbeddings));
             } catch (Exception e) {
                 Notifier.instance().add(

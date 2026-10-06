@@ -9,9 +9,12 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JsonUtils {
+public class Json {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    private Json() {
+    }
 
     public static JsonNode readTree(String json) {
         return MAPPER.readTree(json);

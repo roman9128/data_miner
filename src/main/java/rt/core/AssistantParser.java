@@ -5,5 +5,5 @@ import rt.model.document.RawMessage;
 public interface AssistantParser {
     void closeAuthWindow();
     void showQrCode(String link);
-    void addRawMessageRecord(RawMessage rawMessage);
+    void addRawMessage(RawMessage rawMessage);
 }

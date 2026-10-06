@@ -7,7 +7,7 @@ import rt.model.ai.ToolCall;
 import rt.model.ai.Usage;
 import rt.model.notification.Notification;
 import rt.model.noun.Noun;
-import rt.common_utils.JsonUtils;
+import rt.common_utils.Json;
 
 import java.io.IOException;
 import java.net.URI;
@@ -37,7 +37,7 @@ public class ExternalAPIHandler {
     }
 
     public List<Noun> getNouns(String text) throws IOException, InterruptedException {
-        String json = JsonUtils.makeJson(Map.of("text", text));
+        String json = Json.makeJson(Map.of("text", text));
         byte[] body = json.getBytes(StandardCharsets.UTF_8);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(NOUNS))
@@ -47,11 +47,11 @@ public class ExternalAPIHandler {
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         checkStatus(response, "Natasha");
-        return JsonUtils.parseNounsResponse(response.body());
+        return Json.parseNounsResponse(response.body());
     }
 
     public float[][] getEmbeddings(List<String> texts) throws IOException, InterruptedException {
-        String json = JsonUtils.makeJson(Map.of("inputs", texts));
+        String json = Json.makeJson(Map.of("inputs", texts));
         byte[] body = json.getBytes(StandardCharsets.UTF_8);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(EMBED))
@@ -61,11 +61,11 @@ public class ExternalAPIHandler {
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         checkStatus(response, "Embedding server");
-        return JsonUtils.parseEmbeddingsResponse(response.body());
+        return Json.parseEmbeddingsResponse(response.body());
     }
 
     public void chat(Dialogue dialogue, Usage usage) throws IOException, InterruptedException {
-        String json = JsonUtils.makeJson(dialogue);
+        String json = Json.makeJson(dialogue);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(AiProperties.getUrl()))
                 .header("Authorization", "Bearer " + AiProperties.getKey())
@@ -74,9 +74,9 @@ public class ExternalAPIHandler {
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         checkStatus(response, "AI");
-        String content = JsonUtils.getAiResponse(response.body());
-        List<ToolCall> toolCalls = JsonUtils.parseToolCalls(response.body());
-        usage.add(JsonUtils.getUsage(response.body()));
+        String content = Json.getAiResponse(response.body());
+        List<ToolCall> toolCalls = Json.parseToolCalls(response.body());
+        usage.add(Json.getUsage(response.body()));
         if (!toolCalls.isEmpty()) {
             dialogue.addAssistantToolCalls(content, toolCalls);
         } else {

@@ -5,19 +5,19 @@ import rt.model.ai.Tool;
 import rt.model.document.InfoToShow;
 import rt.model.noun.Noun;
 import rt.storage.DatabaseManager;
-import rt.common_utils.DateTimeUtils;
-import rt.common_utils.TextUtils;
+import rt.common_utils.DateTime;
+import rt.common_utils.Text;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class ExactSearchTool implements Tool {
+class ExactSearchTool implements Tool {
 
     private final DatabaseManager db;
     private final NounExtractor nounExtractor;
 
-    public ExactSearchTool(DatabaseManager db, NounExtractor nounExtractor) {
+    ExactSearchTool(DatabaseManager db, NounExtractor nounExtractor) {
         this.db = db;
         this.nounExtractor = nounExtractor;
     }
@@ -42,16 +42,16 @@ public class ExactSearchTool implements Tool {
         if (arguments.isBlank()) return "";
         List<Noun> nouns = nounExtractor.extract(arguments);
         List<InfoToShow> messagesFromExactSearch = db.searchMessagesExact(arguments, Constants.MAX_MESSAGES);
-        List<InfoToShow> messagesFromExactSearchOfStems = db.searchMessagesExact(TextUtils.stem(arguments), Constants.MAX_MESSAGES);
+        List<InfoToShow> messagesFromExactSearchOfStems = db.searchMessagesExact(Text.stem(arguments), Constants.MAX_MESSAGES);
         List<InfoToShow> messagesFromNounSearch = db.searchMessagesByNouns(nouns, Constants.MAX_MESSAGES);
         List<InfoToShow> messagesFromEntitySearch = db.searchMessagesByEntities(arguments, Constants.MAX_MESSAGES);
         List<InfoToShow> messages = Stream
                 .of(messagesFromExactSearch, messagesFromExactSearchOfStems, messagesFromNounSearch, messagesFromEntitySearch)
                 .flatMap(List::stream)
                 .distinct()
-                .sorted(Comparator.comparing((InfoToShow m) -> DateTimeUtils.getLocalDateTimeOf(m.publishedAt())).reversed())
+                .sorted(Comparator.comparing((InfoToShow m) -> DateTime.getLocalDateTimeOf(m.publishedAt())).reversed())
                 .limit(Constants.MAX_MESSAGES).toList();
         if (messages.isEmpty()) return "";
-        return TextUtils.format(messages);
+        return Text.format(messages);
     }
 }

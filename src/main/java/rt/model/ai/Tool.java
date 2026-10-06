@@ -1,7 +1,7 @@
 package rt.model.ai;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import rt.common_utils.JsonUtils;
+import rt.common_utils.Json;
 
 import java.util.Map;
 
@@ -22,7 +22,7 @@ public interface Tool {
                 "function", Map.of(
                         "name", getName(),
                         "description", getDescription(),
-                        "parameters", JsonUtils.readTree(getParameters())
+                        "parameters", Json.readTree(getParameters())
                 )
         );
     }

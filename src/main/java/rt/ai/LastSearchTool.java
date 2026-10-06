@@ -3,15 +3,15 @@ package rt.ai;
 import rt.model.ai.Tool;
 import rt.model.document.InfoToShow;
 import rt.storage.DatabaseManager;
-import rt.common_utils.TextUtils;
+import rt.common_utils.Text;
 
 import java.util.List;
 
-public class LastSearchTool implements Tool {
+class LastSearchTool implements Tool {
 
     private final DatabaseManager db;
 
-    public LastSearchTool(DatabaseManager db) {
+    LastSearchTool(DatabaseManager db) {
         this.db = db;
     }
 
@@ -34,6 +34,6 @@ public class LastSearchTool implements Tool {
     public String execute(String arguments) {
         List<InfoToShow> messages = db.getLastMessages(Constants.MAX_MESSAGES);
         if (messages.isEmpty()) return "";
-        return TextUtils.format(messages);
+        return Text.format(messages);
     }
 }

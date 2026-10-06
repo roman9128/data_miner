@@ -4,20 +4,20 @@ import rt.data_processing.embedder.EmbeddingClient;
 import rt.model.ai.Tool;
 import rt.model.document.InfoToShow;
 import rt.storage.DatabaseManager;
-import rt.common_utils.TextUtils;
-import rt.common_utils.VectorUtils;
+import rt.common_utils.Text;
+import rt.common_utils.Vector;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SemanticSearchTool implements Tool {
+class SemanticSearchTool implements Tool {
 
     private final DatabaseManager db;
     private final EmbeddingClient embeddingClient;
 
-    public SemanticSearchTool(DatabaseManager db, EmbeddingClient embeddingClient) {
+    SemanticSearchTool(DatabaseManager db, EmbeddingClient embeddingClient) {
         this.db = db;
         this.embeddingClient = embeddingClient;
     }
@@ -42,7 +42,7 @@ public class SemanticSearchTool implements Tool {
         if (arguments.isBlank()) return "";
         List<InfoToShow> messages = findBySemantic(arguments);
         if (messages.isEmpty()) return "";
-        return TextUtils.format(messages);
+        return Text.format(messages);
     }
 
     private List<InfoToShow> findBySemantic(String query) {
@@ -51,7 +51,7 @@ public class SemanticSearchTool implements Tool {
         Map<Long, float[]> messagesEmb = db.getMessageIdsAndEmbeddings();
         Map<Long, Double> candidatesMessageIds = new HashMap<>();
         for (Map.Entry<Long, float[]> entry : messagesEmb.entrySet()) {
-            double similarity = VectorUtils.cosineSimilarity(queryEmb, entry.getValue());
+            double similarity = Vector.cosineSimilarity(queryEmb, entry.getValue());
             if (similarity >= 0.55) candidatesMessageIds.put(entry.getKey(), similarity);
         }
         if (candidatesMessageIds.isEmpty()) return List.of();
