@@ -1,6 +1,6 @@
 package rt.ai;
 
-import rt.api.ExternalAPIHandler;
+import rt.api.ExternalAPI;
 import rt.config.AiProperties;
 import rt.core.AssistantAgent;
 import rt.notifier.Notifier;
@@ -17,16 +17,14 @@ import java.util.List;
 public class Agent {
 
     private final AssistantAgent assistant;
-    private final ExternalAPIHandler api;
     private final Dialogue dialogue;
     private final Usage usage = new Usage(0, 0, 0);
     private final List<Tool> availableTools;
     private static final int MAX_ITERATIONS = 10;
     private volatile boolean isThinking;
 
-    public Agent(ExternalAPIHandler api, DatabaseManager db, EmbeddingClient embeddingClient, NounExtractor nounExtractor, AssistantAgent assistant) {
+    public Agent(DatabaseManager db, EmbeddingClient embeddingClient, NounExtractor nounExtractor, AssistantAgent assistant) {
         this.assistant = assistant;
-        this.api = api;
         this.availableTools = List.of(
                 new LastSearchTool(db),
                 new ExactSearchTool(db, nounExtractor),
@@ -49,7 +47,7 @@ public class Agent {
         while (iteration < MAX_ITERATIONS) {
             iteration++;
             try {
-                api.chat(dialogue, usage);
+                ExternalAPI.chat(dialogue, usage);
             } catch (IOException | InterruptedException e) {
                 String errMsg = "Не удалось обработать Ваш запрос: " + e;
                 answer(errMsg);

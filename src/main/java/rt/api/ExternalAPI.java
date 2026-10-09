@@ -18,14 +18,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-public class ExternalAPIHandler {
+public final class ExternalAPI {
 
-    private final HttpClient client = HttpClient.newHttpClient();
-    private final String HEALTH = "http://127.0.0.1:8001/health";
-    private final String EMBED = "http://127.0.0.1:8001/embed";
-    private final String NOUNS = "http://127.0.0.1:8001/nouns";
+    private static final HttpClient client = HttpClient.newHttpClient();
+    private static final String HEALTH = "http://127.0.0.1:8001/health";
+    private static final String EMBED = "http://127.0.0.1:8001/embed";
+    private static final String NOUNS = "http://127.0.0.1:8001/nouns";
 
-    public boolean checkHealth() {
+    private ExternalAPI() {
+    }
+
+    public static boolean checkHealth() {
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(HEALTH)).GET().build();
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -36,7 +39,7 @@ public class ExternalAPIHandler {
         }
     }
 
-    public List<Noun> getNouns(String text) throws IOException, InterruptedException {
+    public static List<Noun> getNouns(String text) throws IOException, InterruptedException {
         String json = Json.makeJson(Map.of("text", text));
         byte[] body = json.getBytes(StandardCharsets.UTF_8);
         HttpRequest request = HttpRequest.newBuilder()
@@ -50,7 +53,7 @@ public class ExternalAPIHandler {
         return Json.parseNounsResponse(response.body());
     }
 
-    public float[][] getEmbeddings(List<String> texts) throws IOException, InterruptedException {
+    public static float[][] getEmbeddings(List<String> texts) throws IOException, InterruptedException {
         String json = Json.makeJson(Map.of("inputs", texts));
         byte[] body = json.getBytes(StandardCharsets.UTF_8);
         HttpRequest request = HttpRequest.newBuilder()
@@ -64,7 +67,7 @@ public class ExternalAPIHandler {
         return Json.parseEmbeddingsResponse(response.body());
     }
 
-    public void chat(Dialogue dialogue, Usage usage) throws IOException, InterruptedException {
+    public static void chat(Dialogue dialogue, Usage usage) throws IOException, InterruptedException {
         String json = Json.makeJson(dialogue);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(AiProperties.getUrl()))
@@ -84,7 +87,7 @@ public class ExternalAPIHandler {
         }
     }
 
-    private void checkStatus(HttpResponse<String> response, String serviceName) throws IOException {
+    private static void checkStatus(HttpResponse<String> response, String serviceName) throws IOException {
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
             throw new IOException(serviceName + " returned HTTP " + response.statusCode() + ": " + response.body());
         }

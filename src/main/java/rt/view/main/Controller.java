@@ -68,18 +68,18 @@ public class Controller {
     @FXML
     ComboBox<String> contextTopicsComboBox;
 
-    private Core core;
+    private MainView mainView;
 
-    void setCore(Core core) {
-        this.core = core;
+    void setMainView(MainView mainView) {
+        this.mainView = mainView;
     }
 
     DatabaseContext getDatabaseContext() {
-        return core.getDatabaseContext();
+        return mainView.getDatabaseContext();
     }
 
     void setQueryContext(QueryContext queryContext) {
-        core.setQueryContext(queryContext);
+        mainView.setQueryContext(queryContext);
     }
 
     void setChannels(Map<Long, String> channels) {
@@ -118,24 +118,24 @@ public class Controller {
 
     @FXML
     private void onExportToCSV() {
-        core.exportToCSV();
+        mainView.exportToCSV();
     }
 
     @FXML
     private void onSearch() {
-        core.parseTelegramMessages(Tab1Search.instance().getSource(), dateFrom.getValue(), dateTo.getValue());
+        mainView.parseTelegramMessages(Tab1Search.instance().getSource(), dateFrom.getValue(), dateTo.getValue());
     }
 
     @FXML
     void onSendAIMessage() {
-        if (core.isThinking() || core.isBusy()) return;
+        if (mainView.isThinking() || mainView.isBusy()) return;
         String message = aiInput.getText();
         if (message == null || message.isBlank()) return;
         message = message.trim();
         aiInput.clear();
         Tab3AI.instance().addAIMessage(aiMessagesContainer, message, true);
         Tab3AI.instance().showThinkingIndicator(aiMessagesContainer);
-        core.askAgent(message);
+        mainView.askAgent(message);
     }
 
     void showAgentsAnswer(String answer) {
@@ -152,7 +152,7 @@ public class Controller {
 
     @FXML
     private void onClearChat() {
-        core.clearChat();
+        mainView.clearChat();
         Tab3AI.instance().clearChat(aiMessagesContainer);
     }
 
@@ -245,7 +245,7 @@ public class Controller {
             return;
         }
         if (aiContextButton.getStyleClass().contains("context-active")) {
-            core.setQueryContext(null);
+            mainView.setQueryContext(null);
             aiContextButton.getStyleClass().remove("context-active");
             aiContextButton.setText("Контекст ИИ: выключен");
             return;

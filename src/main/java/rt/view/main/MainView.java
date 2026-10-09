@@ -5,13 +5,20 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import rt.core.UseCaseAi;
 import rt.core.Core;
+import rt.core.UseCaseCsvExport;
+import rt.core.UseCaseTelegram;
+import rt.model.ai.DatabaseContext;
+import rt.model.ai.QueryContext;
 import rt.notifier.Notifier;
 import rt.model.ai.Usage;
 import rt.model.notification.Notification;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -19,6 +26,9 @@ import java.util.concurrent.TimeUnit;
 public class MainView {
 
     private Core core;
+    private UseCaseAi useCaseAi;
+    private UseCaseCsvExport useCaseCsvExport;
+    private UseCaseTelegram useCaseTelegram;
     private Stage stage;
     private Controller controller;
     private ScheduledExecutorService sourceUpdater;
@@ -29,6 +39,12 @@ public class MainView {
 
     public void setCore(Core core) {
         this.core = core;
+    }
+
+    public void setUseCases(UseCaseAi useCaseAi, UseCaseCsvExport useCaseCsvExport, UseCaseTelegram useCaseTelegram) {
+        this.useCaseAi = useCaseAi;
+        this.useCaseCsvExport = useCaseCsvExport;
+        this.useCaseTelegram = useCaseTelegram;
     }
 
     public void start() {
@@ -63,7 +79,7 @@ public class MainView {
         stage.setScene(scene);
         stage.setMinWidth(700);
         stage.setMinHeight(700);
-        controller.setCore(core);
+        controller.setMainView(this);
         controller.loadDatabaseContext();
         updateSources(controller);
         startSourceUpdater(controller);
@@ -90,8 +106,8 @@ public class MainView {
 
     private void updateSources(Controller controller) {
         updateContextSources();
-        Map<Integer, String> folders = core.getFoldersIDsAndNames();
-        Map<Long, String> channels = core.getChannelsIDsAndNames();
+        Map<Integer, String> folders = useCaseTelegram.getFoldersIDsAndNames();
+        Map<Long, String> channels = useCaseTelegram.getChannelsIDsAndNames();
         boolean foldersChanged = !folders.equals(lastFolders);
         boolean channelsChanged = !channels.equals(lastChannels);
 
@@ -111,7 +127,7 @@ public class MainView {
     }
 
     private void updateContextSources() {
-        if (core.isThinking() || core.isBusy()) return;
+        if (useCaseAi.isThinking() || core.isBusy()) return;
         Platform.runLater(() -> controller.loadDatabaseContext());
     }
 
@@ -126,7 +142,7 @@ public class MainView {
     private void startQueueUpdater(Controller controller) {
         queueUpdater = Executors.newSingleThreadScheduledExecutor();
         queueUpdater.scheduleWithFixedDelay(() -> Platform.runLater(
-                () -> controller.updateQueueSize(core.getQueueSize())), 0, 1, TimeUnit.SECONDS
+                () -> controller.updateQueueSize(useCaseTelegram.getQueueSize())), 0, 1, TimeUnit.SECONDS
         );
     }
 
@@ -168,5 +184,37 @@ public class MainView {
         notificationUpdater.shutdownNow();
         notificationUpdater = null;
         Notifier.shutdownLogger();
+    }
+
+    DatabaseContext getDatabaseContext() {
+        return useCaseAi.getDatabaseContext();
+    }
+
+    void setQueryContext(QueryContext queryContext) {
+        useCaseAi.setQueryContext(queryContext);
+    }
+
+    void exportToCSV() {
+        useCaseCsvExport.exportToCsv();
+    }
+
+    void parseTelegramMessages(Set<Long> source, LocalDate from, LocalDate to) {
+        useCaseTelegram.parseTelegramMessages(source, from, to);
+    }
+
+    boolean isThinking() {
+        return useCaseAi.isThinking();
+    }
+
+    boolean isBusy() {
+        return core.isBusy();
+    }
+
+    void askAgent(String message) {
+        useCaseAi.askAgent(message);
+    }
+
+    void clearChat() {
+        useCaseAi.clearChat();
     }
 }

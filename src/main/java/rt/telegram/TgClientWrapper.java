@@ -59,14 +59,14 @@ public final class TgClientWrapper implements AutoCloseable {
         switch (authorizationState) {
             case TdApi.AuthorizationStateWaitOtherDeviceConfirmation deviceConfirmation -> {
                 String link = deviceConfirmation.link;
-                assistant.showQrCode(link);
+                assistant.showTelegramQrCode(link);
             }
             case TdApi.AuthorizationStateWaitPassword waitPassword -> {
                 client.send(new TdApi.CheckAuthenticationPassword(Credentials.getPassword()), authErrorHandler);
             }
             case TdApi.AuthorizationStateReady ready -> {
                 Notifier.instance().add(Notification.Level.SHOW_USER, "Telegram готов к работе");
-                assistant.closeAuthWindow();
+                assistant.closeTelegramAuthWindow();
             }
             case TdApi.AuthorizationStateLoggingOut loggingOut -> {
                 Notifier.instance().add(Notification.Level.SHOW_USER, "Разлогинен");

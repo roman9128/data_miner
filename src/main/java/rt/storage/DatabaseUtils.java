@@ -41,7 +41,7 @@ final class DatabaseUtils {
             String placeholders = context.chatIds().stream()
                     .map(id -> "?")
                     .collect(Collectors.joining(", "));
-            conditions.add("m.telegram_chat_id IN (" + placeholders + ")");
+            conditions.add("m.source_id IN (" + placeholders + ")");
             parameters.addAll(context.chatIds());
         }
 
